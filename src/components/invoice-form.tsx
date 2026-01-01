@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useCallback } from 'react';
-import { useForm, useFieldArray, useWatch, FormProvider, useFormContext } from 'react-hook-form';
+import { useForm, useFieldArray, FormProvider, useFormContext, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { nanoid } from 'nanoid';
@@ -36,19 +36,17 @@ const invoiceSchema = z.object({
 
 function debounce<F extends (...args: any[]) => any>(func: F, waitFor: number) {
   let timeout: NodeJS.Timeout;
-  return (...args: Parameters<F>): Promise<ReturnType<F>> =>
-    new Promise(resolve => {
-      if (timeout) {
-        clearTimeout(timeout);
-      }
-      timeout = setTimeout(() => resolve(func(...args)), waitFor);
-    });
+  return (...args: Parameters<F>): void => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), waitFor);
+  };
 }
 
 function FormStateUpdater({ onUpdate }: { onUpdate: (data: Invoice) => void }) {
     const { control } = useFormContext();
-    const watchedData = useWatch({ control });
     const debouncedOnUpdate = useCallback(debounce(onUpdate, 500), [onUpdate]);
+
+    const watchedData = useWatch({ control });
 
     useEffect(() => {
         if (watchedData) {
@@ -63,6 +61,7 @@ export function InvoiceForm({ invoice, onUpdate }: InvoiceFormProps) {
   const formMethods = useForm<Invoice>({
     resolver: zodResolver(invoiceSchema),
     defaultValues: invoice,
+    mode: 'onChange',
   });
 
   const {
