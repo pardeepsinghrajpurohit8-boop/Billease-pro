@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useCallback } from 'react';
-import { useForm, useFieldArray, useWatch, FormProvider } from 'react-hook-form';
+import { useForm, useFieldArray, useWatch, FormProvider, useFormContext } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { nanoid } from 'nanoid';
@@ -34,24 +34,27 @@ const invoiceSchema = z.object({
   sgst: z.number().min(0).max(100),
 });
 
-function debounce<T extends (...args: any[]) => void>(func: T, delay: number) {
+function debounce<F extends (...args: any[]) => any>(func: F, waitFor: number) {
   let timeout: NodeJS.Timeout;
-  return function (this: ThisParameterType<T>, ...args: Parameters<T>) {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func.apply(this, args), delay);
-  };
+  return (...args: Parameters<F>): Promise<ReturnType<F>> =>
+    new Promise(resolve => {
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+      timeout = setTimeout(() => resolve(func(...args)), waitFor);
+    });
 }
 
 function FormStateUpdater({ onUpdate }: { onUpdate: (data: Invoice) => void }) {
-    const watchedData = useWatch();
-    const debouncedOnUpdate = useCallback(debounce(onUpdate, 300), [onUpdate]);
+    const { control } = useFormContext();
+    const watchedData = useWatch({ control });
+    const debouncedOnUpdate = useCallback(debounce(onUpdate, 500), [onUpdate]);
 
     useEffect(() => {
-        const subscription = useWatch({}).subscribe(value => {
-            debouncedOnUpdate(value as Invoice);
-        });
-        return () => subscription.unsubscribe();
-    }, [debouncedOnUpdate]);
+        if (watchedData) {
+            debouncedOnUpdate(watchedData as Invoice);
+        }
+    }, [watchedData, debouncedOnUpdate]);
 
     return null;
 }
@@ -80,103 +83,103 @@ export function InvoiceForm({ invoice, onUpdate }: InvoiceFormProps) {
   
   return (
     <FormProvider {...formMethods}>
-      <form className="space-y-6" onChange={(e) => e.stopPropagation()}>
         <FormStateUpdater onUpdate={onUpdate} />
-        <Card className="shadow-md">
-          <CardHeader>
-            <CardTitle>Customer Details</CardTitle>
-            <CardDescription>Enter the customer's information and bill date.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 gap-4">
-               <div>
-                <Label htmlFor="customerName">Customer Name</Label>
-                <Input id="customerName" {...register('customerName')} placeholder="Enter customer's name" />
-                {errors.customerName && <p className="text-destructive text-sm mt-1">{errors.customerName.message}</p>}
-              </div>
-              <div>
-                <Label htmlFor="invoiceDate">Bill Date</Label>
-                <Input id="invoiceDate" type="date" {...register('invoiceDate')} />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="shadow-md">
-          <CardHeader>
-            <CardTitle>Bill Items</CardTitle>
-            <CardDescription>Add or remove items from the bill.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4 pt-4">
-              {fields.map((item, index) => (
-                  <div key={item.id} className="grid grid-cols-12 gap-2 items-start bg-muted/50 p-3 rounded-lg border">
-                      <div className='col-span-12'>
-                          <Label>Item #{index + 1}</Label>
-                      </div>
-                      <div className='col-span-12'>
-                          <Label className='sr-only'>Description</Label>
-                          <Input
-                              placeholder="Item description"
-                              {...register(`items.${index}.description`)}
-                          />
-                          {errors.items?.[index]?.description && <p className="text-destructive text-sm mt-1">{errors.items[index]?.description?.message}</p>}
-                      </div>
+        <div className="space-y-6">
+            <Card className="shadow-md">
+            <CardHeader>
+                <CardTitle>Customer Details</CardTitle>
+                <CardDescription>Enter the customer's information and bill date.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 gap-4">
+                <div>
+                    <Label htmlFor="customerName">Customer Name</Label>
+                    <Input id="customerName" {...register('customerName')} placeholder="Enter customer's name" />
+                    {errors.customerName && <p className="text-destructive text-sm mt-1">{errors.customerName.message}</p>}
+                </div>
+                <div>
+                    <Label htmlFor="invoiceDate">Bill Date</Label>
+                    <Input id="invoiceDate" type="date" {...register('invoiceDate')} />
+                </div>
+                </div>
+            </CardContent>
+            </Card>
+            
+            <Card className="shadow-md">
+            <CardHeader>
+                <CardTitle>Bill Items</CardTitle>
+                <CardDescription>Add or remove items from the bill.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4 pt-4">
+                {fields.map((item, index) => (
+                    <div key={item.id} className="grid grid-cols-12 gap-2 items-start bg-muted/50 p-3 rounded-lg border">
+                        <div className='col-span-12'>
+                            <Label>Item #{index + 1}</Label>
+                        </div>
+                        <div className='col-span-12'>
+                            <Label className='sr-only'>Description</Label>
+                            <Input
+                                placeholder="Item description"
+                                {...register(`items.${index}.description`)}
+                            />
+                            {errors.items?.[index]?.description && <p className="text-destructive text-sm mt-1">{errors.items[index]?.description?.message}</p>}
+                        </div>
 
-                      <div className='col-span-6'>
-                          <Label className='sr-only'>Quantity</Label>
-                          <Input
-                              type="number"
-                              placeholder="Quantity"
-                              {...register(`items.${index}.quantity`, { valueAsNumber: true })}
-                          />
-                      </div>
-                      
-                      <div className='col-span-6'>
-                          <Label className='sr-only'>Rate</Label>
-                          <Input
-                              type="number"
-                              placeholder="Rate"
-                              {...register(`items.${index}.rate`, { valueAsNumber: true })}
-                          />
-                      </div>
+                        <div className='col-span-6'>
+                            <Label className='sr-only'>Quantity</Label>
+                            <Input
+                                type="number"
+                                placeholder="Quantity"
+                                {...register(`items.${index}.quantity`, { valueAsNumber: true })}
+                            />
+                        </div>
+                        
+                        <div className='col-span-6'>
+                            <Label className='sr-only'>Rate</Label>
+                            <Input
+                                type="number"
+                                placeholder="Rate"
+                                {...register(`items.${index}.rate`, { valueAsNumber: true })}
+                            />
+                        </div>
 
-                      <div className='col-span-12 flex justify-end'>
-                          <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)}>
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                              <span className="sr-only">Remove item</span>
-                          </Button>
-                      </div>
-                  </div>
-              ))}
-              <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => append({ id: nanoid(), description: '', quantity: 1, rate: 0 })}
-                  className="w-full"
-              >
-                  <PlusCircle className="mr-2 h-4 w-4" />
-                  Add Item
-              </Button>
-          </CardContent>
-        </Card>
-        
-        <Card className="shadow-md">
-          <CardHeader>
-            <CardTitle>Taxes</CardTitle>
-            <CardDescription>Applicable tax rates.</CardDescription>
-          </CardHeader>
-          <CardContent className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="cgst">CGST (%)</Label>
-              <Input id="cgst" type="number" {...register('cgst', { valueAsNumber: true })} placeholder="e.g., 2.5" />
-            </div>
-            <div>
-              <Label htmlFor="sgst">SGST (%)</Label>
-              <Input id="sgst" type="number" {...register('sgst', { valueAsNumber: true })} placeholder="e.g., 2.5" />
-            </div>
-          </CardContent>
-        </Card>
-      </form>
+                        <div className='col-span-12 flex justify-end'>
+                            <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)}>
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                                <span className="sr-only">Remove item</span>
+                            </Button>
+                        </div>
+                    </div>
+                ))}
+                <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => append({ id: nanoid(), description: '', quantity: 1, rate: 0 })}
+                    className="w-full"
+                >
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Add Item
+                </Button>
+            </CardContent>
+            </Card>
+            
+            <Card className="shadow-md">
+            <CardHeader>
+                <CardTitle>Taxes</CardTitle>
+                <CardDescription>Applicable tax rates.</CardDescription>
+            </CardHeader>
+            <CardContent className="grid grid-cols-2 gap-4">
+                <div>
+                <Label htmlFor="cgst">CGST (%)</Label>
+                <Input id="cgst" type="number" {...register('cgst', { valueAsNumber: true })} placeholder="e.g., 2.5" />
+                </div>
+                <div>
+                <Label htmlFor="sgst">SGST (%)</Label>
+                <Input id="sgst" type="number" {...register('sgst', { valueAsNumber: true })} placeholder="e.g., 2.5" />
+                </div>
+            </CardContent>
+            </Card>
+        </div>
     </FormProvider>
   );
 }
