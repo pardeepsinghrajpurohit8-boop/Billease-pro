@@ -46,7 +46,6 @@ export function InvoicePreview({ invoice, onPrint }: InvoicePreviewProps) {
                     <div>
                         <h1 className="text-2xl font-extrabold tracking-tight text-destructive">MATESHWARI EXPORTS</h1>
                         <p className="text-muted-foreground">Mfrs. & Wholesale : All types of Jeans & Cotton Pa</p>
-                        <p className="text-muted-foreground text-sm">Jaipur, Rajasthan</p>
                     </div>
                     <div className="text-right">
                         <p className="text-3xl font-bold text-primary/80">BILL</p>
