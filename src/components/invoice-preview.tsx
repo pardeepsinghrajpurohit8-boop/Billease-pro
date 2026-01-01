@@ -43,15 +43,10 @@ export function InvoicePreview({ invoice, onPrint }: InvoicePreviewProps) {
         <Card id="invoice-preview" className="print-bg-white print-text-black w-full shadow-2xl rounded-2xl overflow-hidden border-2 border-primary/10">
             <header className="p-8 bg-primary/5 print-bg-white">
                 <div className="flex justify-between items-start">
-                    <div className="flex items-center gap-4">
-                        <div className="bg-primary p-3 rounded-lg">
-                           <Building className="h-8 w-8 text-primary-foreground" />
-                        </div>
-                        <div>
-                            <h1 className="text-2xl font-extrabold text-primary tracking-tight">MATESHWARI EXPORTS</h1>
-                            <p className="text-muted-foreground">Mfrs. & Wholesale : All types of Jeans & Cotton Pa</p>
-                            <p className="text-muted-foreground text-sm">Jaipur, Rajasthan</p>
-                        </div>
+                    <div>
+                        <h1 className="text-2xl font-extrabold tracking-tight text-destructive">MATESHWARI EXPORTS</h1>
+                        <p className="text-muted-foreground">Mfrs. & Wholesale : All types of Jeans & Cotton Pa</p>
+                        <p className="text-muted-foreground text-sm">Jaipur, Rajasthan</p>
                     </div>
                     <div className="text-right">
                         <p className="text-3xl font-bold text-primary/80">BILL</p>
@@ -83,11 +78,11 @@ export function InvoicePreview({ invoice, onPrint }: InvoicePreviewProps) {
                         {invoice.items.length > 0 && invoice.items.some(i => i.description) ? (
                             invoice.items.map((item, index) => (
                                 <TableRow key={item.id} className="print-border-gray border-b-muted/50">
-                                    <TableCell className="text-center py-4 font-medium">{index + 1}</TableCell>
+                                    <TableCell className="text-center py-4 font-medium print-text-black">{index + 1}</TableCell>
                                     <TableCell className="font-medium py-4">{item.description || 'Not specified'}</TableCell>
-                                    <TableCell className="text-right py-4">{item.quantity || 0}</TableCell>
-                                    <TableCell className="text-right py-4">{formatCurrency(item.rate || 0)}</TableCell>
-                                    <TableCell className="text-right font-semibold py-4">{formatCurrency((item.quantity || 0) * (item.rate || 0))}</TableCell>
+                                    <TableCell className="text-right py-4 print-text-black">{item.quantity || 0}</TableCell>
+                                    <TableCell className="text-right py-4 print-text-black">{formatCurrency(item.rate || 0)}</TableCell>
+                                    <TableCell className="text-right font-semibold py-4 print-text-black">{formatCurrency((item.quantity || 0) * (item.rate || 0))}</TableCell>
                                 </TableRow>
                             ))
                         ) : (
@@ -107,20 +102,20 @@ export function InvoicePreview({ invoice, onPrint }: InvoicePreviewProps) {
                   <div className="w-full max-w-xs space-y-3 text-sm">
                       <div className="flex justify-between">
                           <span className="text-muted-foreground">Subtotal</span>
-                          <span className="font-medium">{formatCurrency(subtotal)}</span>
+                          <span className="font-medium print-text-black">{formatCurrency(subtotal)}</span>
                       </div>
                       <div className="flex justify-between">
                           <span className="text-muted-foreground">CGST ({invoice.cgst || 0}%)</span>
-                          <span className="font-medium">{formatCurrency(cgstAmount)}</span>
+                          <span className="font-medium print-text-black">{formatCurrency(cgstAmount)}</span>
                       </div>
                       <div className="flex justify-between">
                           <span className="text-muted-foreground">SGST ({invoice.sgst || 0}%)</span>
-                          <span className="font-medium">{formatCurrency(sgstAmount)}</span>
+                          <span className="font-medium print-text-black">{formatCurrency(sgstAmount)}</span>
                       </div>
                       <Separator className="my-2 bg-primary/10" />
                       <div className="flex justify-between items-center">
                           <span className="font-bold text-lg text-primary">Grand Total</span>
-                          <span className="font-bold text-xl text-primary">{formatCurrency(grandTotal)}</span>
+                          <span className="font-bold text-xl print-text-black">{formatCurrency(grandTotal)}</span>
                       </div>
                   </div>
                 </div>
