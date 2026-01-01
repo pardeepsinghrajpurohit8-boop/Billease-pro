@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useCallback } from 'react';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm, useFieldArray, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { nanoid } from 'nanoid';
@@ -34,7 +34,6 @@ const invoiceSchema = z.object({
   sgst: z.number().min(0).max(100),
 });
 
-// Debounce function
 function debounce<T extends (...args: any[]) => void>(func: T, delay: number) {
   let timeout: NodeJS.Timeout;
   return function (this: ThisParameterType<T>, ...args: Parameters<T>) {
@@ -43,11 +42,21 @@ function debounce<T extends (...args: any[]) => void>(func: T, delay: number) {
   };
 }
 
+function FormStateUpdater({ onUpdate }: { onUpdate: (data: Invoice) => void }) {
+    const data = useWatch();
+    const debouncedOnUpdate = useCallback(debounce(onUpdate, 300), [onUpdate]);
+  
+    useEffect(() => {
+        debouncedOnUpdate(data);
+    }, [data, debouncedOnUpdate]);
+  
+    return null;
+}
+
 export function InvoiceForm({ invoice, onUpdate }: InvoiceFormProps) {
   const {
     register,
     control,
-    watch,
     reset,
     formState: { errors },
   } = useForm<Invoice>({
@@ -63,18 +72,10 @@ export function InvoiceForm({ invoice, onUpdate }: InvoiceFormProps) {
   useEffect(() => {
     reset(invoice);
   }, [invoice, reset]);
-
-  const debouncedOnUpdate = useCallback(debounce(onUpdate, 300), [onUpdate]);
-
-  useEffect(() => {
-    const subscription = watch((value) => {
-        debouncedOnUpdate(value as Invoice);
-    });
-    return () => subscription.unsubscribe();
-  }, [watch, debouncedOnUpdate]);
   
   return (
     <form className="space-y-6">
+      <FormStateUpdater onUpdate={onUpdate} />
       <Card className="shadow-md">
         <CardHeader>
           <CardTitle>Customer Details</CardTitle>
@@ -144,7 +145,7 @@ export function InvoiceForm({ invoice, onUpdate }: InvoiceFormProps) {
             <Button
                 type="button"
                 variant="outline"
-                onClick={() => append({ id: nanoid(), description: 'Cotton PANT', quantity: 1, rate: 0 })}
+                onClick={() => append({ id: nanoid(), description: 'Cotten PANT', quantity: 1, rate: 0 })}
                 className="w-full"
             >
                 <PlusCircle className="mr-2 h-4 w-4" />
