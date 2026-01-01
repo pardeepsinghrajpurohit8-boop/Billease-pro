@@ -5,7 +5,7 @@ import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Download, Building, FileText } from 'lucide-react';
+import { Download, FileText } from 'lucide-react';
 import { useMemo } from 'react';
 
 interface InvoicePreviewProps {
@@ -40,47 +40,47 @@ export function InvoicePreview({ invoice, onPrint }: InvoicePreviewProps) {
                 <Download className="mr-2 h-4 w-4" /> Download PDF
             </Button>
         </div>
-        <Card id="invoice-preview" className="print-bg-white print-text-black w-full shadow-2xl rounded-2xl overflow-hidden border-2 border-primary/10">
+        <Card id="invoice-preview" className="print-bg-white print-text-black w-full shadow-2xl rounded-2xl overflow-hidden border-2 border-primary/20">
             <header className="p-8 bg-primary/5 print-bg-white">
                 <div className="flex justify-between items-start">
                     <div>
-                        <h1 className="text-2xl font-extrabold tracking-tight text-destructive">MATESHWARI EXPORTS</h1>
-                        <p className="print-text-black">Mfrs. & Wholesale : All types of Jeans & Cotton Pa</p>
+                        <h1 className="text-2xl font-extrabold tracking-tight text-red-600">MATESHWARI EXPORTS</h1>
+                        <p className="text-black">Mfrs. & Wholesale : All types of Jeans & Cotton Pa</p>
                     </div>
                     <div className="text-right">
-                        <p className="text-sm print-text-black mt-1">Date: {invoice.invoiceDate ? new Date(invoice.invoiceDate).toLocaleDateString('en-GB') : 'N/A'}</p>
+                        <p className="text-sm text-black mt-1">Date: {invoice.invoiceDate ? new Date(invoice.invoiceDate).toLocaleDateString('en-GB') : 'N/A'}</p>
                     </div>
                 </div>
                 
-                <Separator className="my-6 bg-primary/10" />
+                <Separator className="my-6 bg-primary/20 print-border-gray" />
                 
                 <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                        <p className="font-semibold print-text-black mb-1">Bill To:</p>
-                        <p className="font-bold text-lg print-text-black">{invoice.customerName || 'Customer Name'}</p>
+                        <p className="font-semibold text-black mb-1">Bill To:</p>
+                        <p className="font-bold text-lg text-black">{invoice.customerName || 'Customer Name'}</p>
                     </div>
                 </div>
             </header>
-            <main className="p-0">
+            <main className="p-0 border-t border-primary/20 print-border-gray">
                 <Table>
                     <TableHeader className="bg-muted/50 print-border-gray">
-                        <TableRow className="border-b-primary/10">
-                            <TableHead className="w-[80px] text-center font-bold print-text-black">S.No.</TableHead>
-                            <TableHead className="font-bold print-text-black">Item Description</TableHead>
-                            <TableHead className="text-right font-bold print-text-black">Quantity</TableHead>
-                            <TableHead className="text-right font-bold print-text-black">Rate</TableHead>
-                            <TableHead className="text-right font-bold print-text-black">Amount</TableHead>
+                        <TableRow className="border-b-primary/20 print-border-gray">
+                            <TableHead className="w-[80px] text-center font-bold text-black">S.No.</TableHead>
+                            <TableHead className="font-bold text-black">Item Description</TableHead>
+                            <TableHead className="text-right font-bold text-black">Quantity</TableHead>
+                            <TableHead className="text-right font-bold text-black">Rate</TableHead>
+                            <TableHead className="text-right font-bold text-black">Amount</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {invoice.items.length > 0 && invoice.items.some(i => i.description) ? (
                             invoice.items.map((item, index) => (
-                                <TableRow key={item.id} className="print-border-gray border-b-muted/50">
-                                    <TableCell className="text-center py-4 font-medium print-text-black">{index + 1}</TableCell>
-                                    <TableCell className="font-medium py-4 print-text-black">{item.description || 'Not specified'}</TableCell>
-                                    <TableCell className="text-right py-4 print-text-black">{item.quantity || 0}</TableCell>
-                                    <TableCell className="text-right py-4 print-text-black">{formatCurrency(item.rate || 0)}</TableCell>
-                                    <TableCell className="text-right font-semibold py-4 print-text-black">{formatCurrency((item.quantity || 0) * (item.rate || 0))}</TableCell>
+                                <TableRow key={item.id} className="border-b border-primary/10 print-border-gray">
+                                    <TableCell className="text-center py-4 font-medium text-black">{index + 1}</TableCell>
+                                    <TableCell className="font-medium py-4 text-black">{item.description || 'Not specified'}</TableCell>
+                                    <TableCell className="text-right py-4 text-black">{item.quantity || 0}</TableCell>
+                                    <TableCell className="text-right py-4 text-black">{formatCurrency(item.rate || 0)}</TableCell>
+                                    <TableCell className="text-right font-semibold py-4 text-black">{formatCurrency((item.quantity || 0) * (item.rate || 0))}</TableCell>
                                 </TableRow>
                             ))
                         ) : (
@@ -95,32 +95,32 @@ export function InvoicePreview({ invoice, onPrint }: InvoicePreviewProps) {
                     </TableBody>
                 </Table>
             </main>
-            <footer className="p-8 bg-primary/5 print-bg-white">
+            <footer className="p-8 bg-primary/5 print-bg-white border-t border-primary/20 print-border-gray">
                 <div className="flex justify-end">
                   <div className="w-full max-w-xs space-y-3 text-sm">
                       <div className="flex justify-between">
-                          <span className="print-text-black">Subtotal</span>
-                          <span className="font-medium print-text-black">{formatCurrency(subtotal)}</span>
+                          <span className="text-black">Subtotal</span>
+                          <span className="font-medium text-black">{formatCurrency(subtotal)}</span>
                       </div>
                       <div className="flex justify-between">
-                          <span className="print-text-black">CGST ({invoice.cgst || 0}%)</span>
-                          <span className="font-medium print-text-black">{formatCurrency(cgstAmount)}</span>
+                          <span className="text-black">CGST ({invoice.cgst || 0}%)</span>
+                          <span className="font-medium text-black">{formatCurrency(cgstAmount)}</span>
                       </div>
                       <div className="flex justify-between">
-                          <span className="print-text-black">SGST ({invoice.sgst || 0}%)</span>
-                          <span className="font-medium print-text-black">{formatCurrency(sgstAmount)}</span>
+                          <span className="text-black">SGST ({invoice.sgst || 0}%)</span>
+                          <span className="font-medium text-black">{formatCurrency(sgstAmount)}</span>
                       </div>
-                      <Separator className="my-2 bg-primary/10" />
+                      <Separator className="my-2 bg-primary/20 print-border-gray" />
                       <div className="flex justify-between items-center">
-                          <span className="font-bold text-lg print-text-black">Grand Total</span>
-                          <span className="font-bold text-xl print-text-black">{formatCurrency(grandTotal)}</span>
+                          <span className="font-bold text-lg text-black">Grand Total</span>
+                          <span className="font-bold text-xl text-black">{formatCurrency(grandTotal)}</span>
                       </div>
                   </div>
                 </div>
-                <Separator className="my-6 bg-primary/10" />
+                <Separator className="my-6 bg-primary/20 print-border-gray" />
                 <div className="text-center w-full text-muted-foreground text-xs">
-                    <p className="font-semibold">Thank you for your business!</p>
-                    <p>MATESHWARI EXPORTS</p>
+                    <p className="font-semibold text-black">Thank you for your business!</p>
+                    <p className="text-black">MATESHWARI EXPORTS</p>
                 </div>
             </footer>
         </Card>
