@@ -56,7 +56,6 @@ export function InvoiceForm({ invoice, onUpdate }: InvoiceFormProps) {
     reset(invoice);
   }, [invoice, reset]);
 
-  const watchedValues = watch();
   useEffect(() => {
     const subscription = watch((value) => {
         onUpdate(value as Invoice);
