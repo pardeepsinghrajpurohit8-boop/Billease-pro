@@ -18,6 +18,8 @@ import {
 } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 const getInitialInvoice = (): Invoice => ({
   id: nanoid(),
@@ -108,7 +110,28 @@ export default function Home() {
   };
 
   const handlePrint = () => {
-    window.print();
+    const input = document.getElementById('invoice-preview');
+    if (input) {
+      html2canvas(input, { scale: 2 }).then((canvas) => {
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const canvasWidth = canvas.width;
+        const canvasHeight = canvas.height;
+        const ratio = canvasWidth / canvasHeight;
+        const width = pdfWidth;
+        const height = width / ratio;
+
+        let finalHeight = height;
+        if (height > pdfHeight) {
+          finalHeight = pdfHeight;
+        }
+
+        pdf.addImage(imgData, 'PNG', 0, 0, width, finalHeight);
+        pdf.save('invoice.pdf');
+      });
+    }
   };
 
   if (!isMounted) {
