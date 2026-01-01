@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -34,6 +34,15 @@ const invoiceSchema = z.object({
   sgst: z.number().min(0).max(100),
 });
 
+// Debounce function
+function debounce<T extends (...args: any[]) => void>(func: T, delay: number) {
+  let timeout: NodeJS.Timeout;
+  return function (this: ThisParameterType<T>, ...args: Parameters<T>) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(this, args), delay);
+  };
+}
+
 export function InvoiceForm({ invoice, onUpdate }: InvoiceFormProps) {
   const {
     register,
@@ -55,12 +64,14 @@ export function InvoiceForm({ invoice, onUpdate }: InvoiceFormProps) {
     reset(invoice);
   }, [invoice, reset]);
 
+  const debouncedOnUpdate = useCallback(debounce(onUpdate, 300), [onUpdate]);
+
   useEffect(() => {
     const subscription = watch((value) => {
-        onUpdate(value as Invoice);
+        debouncedOnUpdate(value as Invoice);
     });
     return () => subscription.unsubscribe();
-  }, [watch, onUpdate]);
+  }, [watch, debouncedOnUpdate]);
   
   return (
     <form className="space-y-6">
