@@ -47,11 +47,8 @@ function FormStateUpdater({ control, onUpdate }: { control: any, onUpdate: (data
     const debouncedOnUpdate = useCallback(debounce(onUpdate, 300), [onUpdate]);
 
     useEffect(() => {
-        const subscription = control.subscribe((value: any) => {
-            debouncedOnUpdate(value as Invoice);
-        });
-        return () => subscription.unsubscribe();
-    }, [control, debouncedOnUpdate]);
+        debouncedOnUpdate(watchedData);
+    }, [watchedData, debouncedOnUpdate]);
 
     return null;
 }
