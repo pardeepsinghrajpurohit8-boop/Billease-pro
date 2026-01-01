@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { FilePlus2 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const getInitialInvoice = (): Invoice => ({
   id: nanoid(),
