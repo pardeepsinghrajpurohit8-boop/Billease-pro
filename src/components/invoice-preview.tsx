@@ -5,7 +5,7 @@ import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Download, Save } from 'lucide-react';
+import { Download, Save, Building } from 'lucide-react';
 import { useMemo } from 'react';
 
 interface InvoicePreviewProps {
@@ -44,24 +44,27 @@ export function InvoicePreview({ invoice, onSave, onPrint }: InvoicePreviewProps
         </div>
         <Card id="invoice-preview" className="print-bg-white print-text-black w-full shadow-lg">
             <CardHeader className="bg-muted/30 print-bg-white p-6">
-                <div className="flex justify-between items-start">
-                    <div>
-                        <h1 className="text-2xl font-bold text-primary">MATESHWARI EXPORTS</h1>
-                        <p className="text-muted-foreground">Mfrs. & Wholesale : All types of Jeans & Cotton Pa</p>
+                <div className="flex justify-between items-start mb-6">
+                    <div className="flex items-center gap-4">
+                        <Building className="h-12 w-12 text-primary" />
+                        <div>
+                            <h1 className="text-2xl font-bold text-primary">MATESHWARI EXPORTS</h1>
+                            <p className="text-muted-foreground text-sm">Mfrs. & Wholesale : All types of Jeans & Cotton Pa</p>
+                            <p className="text-muted-foreground text-sm">Jaipur, Rajasthan</p>
+                        </div>
                     </div>
                     <div className="text-right">
-                        <h2 className="text-3xl font-bold uppercase tracking-wider">Invoice</h2>
-                        <p className="text-muted-foreground"># {invoice.invoiceNumber || 'N/A'}</p>
+                        <p className="text-sm"><span className="font-semibold text-muted-foreground">Invoice #:</span> {invoice.invoiceNumber || 'N/A'}</p>
+                        <p className="text-sm"><span className="font-semibold text-muted-foreground">Date:</span> {invoice.invoiceDate ? new Date(invoice.invoiceDate).toLocaleDateString() : 'N/A'}</p>
                     </div>
                 </div>
+                
                 <Separator className="my-4" />
+                
                 <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                        <p className="font-semibold text-muted-foreground">Bill To:</p>
-                        <p className="font-bold text-lg">{invoice.customerName || 'Customer Name'}</p>
-                    </div>
-                    <div className="text-right">
-                        <p><span className="font-semibold text-muted-foreground">Invoice Date:</span> {invoice.invoiceDate ? new Date(invoice.invoiceDate).toLocaleDateString() : 'N/A'}</p>
+                        <p className="font-semibold text-muted-foreground mb-1">Bill To:</p>
+                        <p className="font-bold text-base">{invoice.customerName || 'Customer Name'}</p>
                     </div>
                 </div>
             </CardHeader>
@@ -69,7 +72,7 @@ export function InvoicePreview({ invoice, onSave, onPrint }: InvoicePreviewProps
                 <Table>
                     <TableHeader className="bg-muted/50 print-border-gray">
                         <TableRow>
-                            <TableHead className="w-[60px]">S.No.</TableHead>
+                            <TableHead className="w-[60px] text-center">S.No.</TableHead>
                             <TableHead>Item Description</TableHead>
                             <TableHead className="text-right">Quantity</TableHead>
                             <TableHead className="text-right">Rate</TableHead>
@@ -79,7 +82,7 @@ export function InvoicePreview({ invoice, onSave, onPrint }: InvoicePreviewProps
                     <TableBody>
                         {invoice.items.map((item, index) => (
                             <TableRow key={item.id} className="print-border-gray">
-                                <TableCell>{index + 1}</TableCell>
+                                <TableCell className="text-center">{index + 1}</TableCell>
                                 <TableCell className="font-medium">{item.description || 'Not specified'}</TableCell>
                                 <TableCell className="text-right">{item.quantity || 0}</TableCell>
                                 <TableCell className="text-right">{formatCurrency(item.rate || 0)}</TableCell>
@@ -94,27 +97,29 @@ export function InvoicePreview({ invoice, onSave, onPrint }: InvoicePreviewProps
                     </div>
                 ) : null}
             </CardContent>
-            <CardFooter className="p-6 bg-muted/30 print-bg-white">
-                <div className="w-full flex justify-end">
-                    <div className="w-full max-w-sm space-y-2 text-sm">
-                        <div className="flex justify-between">
-                            <span className="text-muted-foreground">Subtotal</span>
-                            <span className="font-medium">{formatCurrency(subtotal)}</span>
-                        </div>
-                        <div className="flex justify-between">
-                            <span className="text-muted-foreground">CGST ({invoice.cgst || 0}%)</span>
-                            <span className="font-medium">{formatCurrency(cgstAmount)}</span>
-                        </div>
-                        <div className="flex justify-between">
-                            <span className="text-muted-foreground">SGST ({invoice.sgst || 0}%)</span>
-                            <span className="font-medium">{formatCurrency(sgstAmount)}</span>
-                        </div>
-                        <Separator className="my-2" />
-                        <div className="flex justify-between items-center text-lg">
-                            <span className="font-bold">Grand Total</span>
-                            <span className="font-bold text-accent">{formatCurrency(grandTotal)}</span>
-                        </div>
+            <CardFooter className="p-6 bg-muted/30 print-bg-white flex-col items-end">
+                <div className="w-full max-w-sm space-y-2 text-sm mb-4">
+                    <div className="flex justify-between">
+                        <span className="text-muted-foreground">Subtotal</span>
+                        <span className="font-medium">{formatCurrency(subtotal)}</span>
                     </div>
+                    <div className="flex justify-between">
+                        <span className="text-muted-foreground">CGST ({invoice.cgst || 0}%)</span>
+                        <span className="font-medium">{formatCurrency(cgstAmount)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span className="text-muted-foreground">SGST ({invoice.sgst || 0}%)</span>
+                        <span className="font-medium">{formatCurrency(sgstAmount)}</span>
+                    </div>
+                    <Separator className="my-2" />
+                    <div className="flex justify-between items-center text-lg">
+                        <span className="font-bold">Grand Total</span>
+                        <span className="font-bold text-accent">{formatCurrency(grandTotal)}</span>
+                    </div>
+                </div>
+                <Separator className="my-4" />
+                <div className="text-center w-full text-muted-foreground text-xs">
+                    <p>Thank you for your business!</p>
                 </div>
             </CardFooter>
         </Card>

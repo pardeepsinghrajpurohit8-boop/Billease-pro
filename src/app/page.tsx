@@ -84,31 +84,6 @@ export default function Home() {
     });
   };
 
-  const handleLoad = (id: string) => {
-    const loadedInvoice = savedInvoices.find((inv) => inv.id === id);
-    if (loadedInvoice) {
-      setInvoice(loadedInvoice);
-      toast({
-        title: 'Invoice Loaded',
-        description: `Invoice for ${loadedInvoice.customerName} has been loaded.`,
-      });
-    }
-  };
-
-  const handleDelete = (id: string) => {
-    const newSavedInvoices = savedInvoices.filter((inv) => inv.id !== id);
-    setSavedInvoices(newSavedInvoices);
-    localStorage.setItem('savedInvoices', JSON.stringify(newSavedInvoices));
-    toast({
-      variant: 'destructive',
-      title: 'Invoice Deleted',
-      description: 'The selected invoice has been deleted.',
-    });
-    if (invoice.id === id) {
-      handleNew();
-    }
-  };
-
   const handlePrint = () => {
     const input = document.getElementById('invoice-preview');
     if (input) {
@@ -149,46 +124,6 @@ export default function Home() {
           <Button onClick={handleNew} variant="outline">
             <FilePlus2 className="mr-2 h-4 w-4" /> New Invoice
           </Button>
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button>
-                <BookOpen className="mr-2 h-4 w-4" /> Saved Invoices
-              </Button>
-            </SheetTrigger>
-            <SheetContent>
-              <SheetHeader>
-                <SheetTitle>Saved Invoices</SheetTitle>
-                <SheetDescription>
-                  Load or delete your previously saved invoices.
-                </SheetDescription>
-              </SheetHeader>
-              <ScrollArea className="h-[calc(100%-80px)] mt-4">
-                <div className="space-y-4 pr-6">
-                  {savedInvoices.length > 0 ? (
-                    savedInvoices.map((saved) => (
-                      <div key={saved.id} className="p-4 rounded-lg border bg-card">
-                        <p className="font-semibold">{saved.customerName || 'Unnamed'}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {new Date(saved.invoiceDate).toLocaleDateString()} - INV-{saved.invoiceNumber}
-                        </p>
-                        <Separator className="my-2" />
-                        <div className="flex justify-end gap-2">
-                          <Button size="sm" variant="outline" onClick={() => handleLoad(saved.id)}>
-                            Load
-                          </Button>
-                          <Button size="sm" variant="destructive" onClick={() => handleDelete(saved.id)}>
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-muted-foreground text-center py-8">No saved invoices.</p>
-                  )}
-                </div>
-              </ScrollArea>
-            </SheetContent>
-          </Sheet>
         </div>
       </header>
 
