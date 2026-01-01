@@ -9,10 +9,9 @@ import { nanoid } from 'nanoid';
 import type { Invoice, InvoiceItem } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Trash2, PlusCircle } from 'lucide-react';
-import { Separator } from './ui/separator';
 
 interface InvoiceFormProps {
   invoice: Invoice;
@@ -53,27 +52,27 @@ export function InvoiceForm({ invoice, onUpdate }: InvoiceFormProps) {
     name: 'items',
   });
   
-  // Reset form when the invoice prop changes from outside
   useEffect(() => {
     reset(invoice);
   }, [invoice, reset]);
 
   const watchedValues = watch();
   useEffect(() => {
-    // To prevent updating state on initial render before form is fully ready
-    if(JSON.stringify(watchedValues) !== JSON.stringify(invoice)) {
-        onUpdate(watchedValues as Invoice);
-    }
-  }, [watchedValues, onUpdate, invoice]);
+    const subscription = watch((value) => {
+        onUpdate(value as Invoice);
+    });
+    return () => subscription.unsubscribe();
+  }, [watch, onUpdate]);
   
   return (
-    <form className="p-4 space-y-6">
-      <Card>
+    <form className="space-y-6">
+      <Card className="shadow-md">
         <CardHeader>
           <CardTitle>Customer Details</CardTitle>
+          <CardDescription>Enter the customer's information and bill date.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4">
              <div>
               <Label htmlFor="customerName">Customer Name</Label>
               <Input id="customerName" {...register('customerName')} placeholder="Enter customer's name" />
@@ -87,52 +86,48 @@ export function InvoiceForm({ invoice, onUpdate }: InvoiceFormProps) {
         </CardContent>
       </Card>
       
-      <Card>
+      <Card className="shadow-md">
         <CardHeader>
           <CardTitle>Bill Items</CardTitle>
+          <CardDescription>Add or remove items from the bill.</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-            <div className='hidden md:grid grid-cols-12 gap-4 items-center mb-2'>
-                <Label className="col-span-5">Description</Label>
-                <Label className="col-span-2">Qty</Label>
-                <Label className="col-span-3">Rate</Label>
-                <Label className="col-span-2"></Label>
-            </div>
+        <CardContent className="space-y-4 pt-4">
             {fields.map((item, index) => (
-                <div key={item.id} className="grid grid-cols-12 gap-2 items-start bg-muted/50 p-2 rounded-lg">
-                    <div className='col-span-12 md:col-span-5'>
-                        <Label className='md:hidden'>Description</Label>
+                <div key={item.id} className="grid grid-cols-12 gap-2 items-start bg-muted/50 p-3 rounded-lg border">
+                    <div className='col-span-12'>
+                        <Label>Item #{index + 1}</Label>
+                    </div>
+                    <div className='col-span-12'>
+                        <Label className='sr-only'>Description</Label>
                         <Input
                             placeholder="Item description"
                             {...register(`items.${index}.description`)}
-                            className="bg-background"
                         />
                         {errors.items?.[index]?.description && <p className="text-destructive text-sm mt-1">{errors.items[index]?.description?.message}</p>}
                     </div>
 
-                    <div className='col-span-4 md:col-span-2'>
-                        <Label className='md:hidden'>Quantity</Label>
+                    <div className='col-span-6'>
+                        <Label className='sr-only'>Quantity</Label>
                         <Input
                             type="number"
-                            placeholder="1"
+                            placeholder="Quantity"
                             {...register(`items.${index}.quantity`, { valueAsNumber: true })}
-                            className="bg-background"
                         />
                     </div>
                     
-                    <div className='col-span-8 md:col-span-3'>
-                        <Label className='md:hidden'>Rate</Label>
+                    <div className='col-span-6'>
+                        <Label className='sr-only'>Rate</Label>
                         <Input
                             type="number"
-                            placeholder="0.00"
+                            placeholder="Rate"
                             {...register(`items.${index}.rate`, { valueAsNumber: true })}
-                             className="bg-background"
                         />
                     </div>
 
-                    <div className='col-span-12 md:col-span-2 flex justify-end items-center h-10'>
+                    <div className='col-span-12 flex justify-end'>
                         <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)}>
                             <Trash2 className="h-4 w-4 text-destructive" />
+                            <span className="sr-only">Remove item</span>
                         </Button>
                     </div>
                 </div>
@@ -149,9 +144,10 @@ export function InvoiceForm({ invoice, onUpdate }: InvoiceFormProps) {
         </CardContent>
       </Card>
       
-      <Card>
+      <Card className="shadow-md">
         <CardHeader>
           <CardTitle>Taxes</CardTitle>
+          <CardDescription>Applicable tax rates.</CardDescription>
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-4">
           <div>

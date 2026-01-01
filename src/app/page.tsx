@@ -7,7 +7,7 @@ import { InvoiceForm } from '@/components/invoice-form';
 import { InvoicePreview } from '@/components/invoice-preview';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { FilePlus2 } from 'lucide-react';
+import { FilePlus2, ReceiptText } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -34,15 +34,6 @@ export default function Home() {
     setInvoice(newInvoiceData);
   }, []);
 
-  const handleSave = () => {
-    // This functionality is currently not used but can be expanded later.
-    toast({
-      title: 'Action Triggered',
-      description: 'Save functionality can be implemented here.',
-      className: 'bg-accent text-accent-foreground',
-    });
-  };
-
   const handleNew = () => {
     setInvoice(getInitialInvoice());
     toast({
@@ -54,7 +45,7 @@ export default function Home() {
   const handlePrint = () => {
     const input = document.getElementById('invoice-preview');
     if (input) {
-      html2canvas(input, { scale: 2 }).then((canvas) => {
+      html2canvas(input, { scale: 3, useCORS: true, backgroundColor: '#ffffff' }).then((canvas) => {
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF('p', 'mm', 'a4');
         const pdfWidth = pdf.internal.pageSize.getWidth();
@@ -65,10 +56,7 @@ export default function Home() {
         const width = pdfWidth;
         const height = width / ratio;
 
-        let finalHeight = height;
-        if (height > pdfHeight) {
-          finalHeight = pdfHeight;
-        }
+        let finalHeight = height > pdfHeight ? pdfHeight : height;
 
         pdf.addImage(imgData, 'PNG', 0, 0, width, finalHeight);
         pdf.save('bill.pdf');
@@ -77,32 +65,44 @@ export default function Home() {
   };
 
   if (!isMounted) {
-    return null; // or a loading spinner
+    return (
+        <div className="flex items-center justify-center h-screen">
+            <div className="text-xl text-muted-foreground">Loading...</div>
+        </div>
+    );
   }
 
   return (
-    <main className="flex flex-col h-screen">
-      <header className="flex items-center justify-between p-4 border-b bg-card">
-        <div className="flex items-center gap-4">
-          <FilePlus2 className="h-8 w-8 text-primary" />
-          <h1 className="text-xl font-bold">BillEase Pro</h1>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button onClick={handleNew} variant="outline">
-            <FilePlus2 className="mr-2 h-4 w-4" /> New Bill
-          </Button>
-        </div>
-      </header>
+    <div className="min-h-screen bg-muted/30">
+        <header className="bg-background/80 backdrop-blur-sm sticky top-0 z-10 border-b">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex items-center justify-between h-16">
+                    <div className="flex items-center gap-3">
+                        <div className="bg-primary text-primary-foreground p-2 rounded-lg">
+                           <ReceiptText className="h-6 w-6" />
+                        </div>
+                        <h1 className="text-2xl font-bold tracking-tight">BillEase Pro</h1>
+                    </div>
+                    <Button onClick={handleNew} variant="default">
+                        <FilePlus2 className="mr-2 h-4 w-4" /> New Bill
+                    </Button>
+                </div>
+            </div>
+        </header>
 
-      <div className="flex-1 grid md:grid-cols-2 lg:grid-cols-5 overflow-hidden">
-        <ScrollArea className="lg:col-span-2 md:col-span-1 h-full">
-          <InvoiceForm invoice={invoice} onUpdate={handleUpdate} />
-        </ScrollArea>
+        <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                <div className="lg:col-span-1">
+                    <div className="sticky top-24">
+                       <InvoiceForm invoice={invoice} onUpdate={handleUpdate} />
+                    </div>
+                </div>
 
-        <div className="lg:col-span-3 md:col-span-1 bg-muted/30 p-4 sm:p-8 flex justify-center items-start overflow-y-auto">
-          <InvoicePreview invoice={invoice} onSave={handleSave} onPrint={handlePrint} />
-        </div>
-      </div>
-    </main>
+                <div className="lg:col-span-2">
+                    <InvoicePreview invoice={invoice} onPrint={handlePrint} />
+                </div>
+            </div>
+        </main>
+    </div>
   );
 }
