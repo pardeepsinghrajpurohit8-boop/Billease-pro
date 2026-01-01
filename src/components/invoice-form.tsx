@@ -43,16 +43,15 @@ function debounce<T extends (...args: any[]) => void>(func: T, delay: number) {
 }
 
 function FormStateUpdater({ onUpdate, control }: { onUpdate: (data: Invoice) => void, control: any }) {
-    const data = useWatch({ control });
+    const watchedData = useWatch({ control });
     const debouncedOnUpdate = useCallback(debounce(onUpdate, 300), [onUpdate]);
-  
+
     useEffect(() => {
-        const subscription = useWatch({ control }).subscribe(value => {
-            debouncedOnUpdate(value as Invoice);
-        });
-        return () => subscription.unsubscribe();
-    }, [control, debouncedOnUpdate]);
-  
+        if (watchedData) {
+            debouncedOnUpdate(watchedData as Invoice);
+        }
+    }, [watchedData, debouncedOnUpdate]);
+
     return null;
 }
 
@@ -80,7 +79,7 @@ export function InvoiceForm({ invoice, onUpdate }: InvoiceFormProps) {
   
   return (
     <FormProvider {...formMethods}>
-      <form className="space-y-6">
+      <form className="space-y-6" onChange={(e) => e.stopPropagation()}>
         <FormStateUpdater onUpdate={onUpdate} control={control} />
         <Card className="shadow-md">
           <CardHeader>
@@ -168,11 +167,11 @@ export function InvoiceForm({ invoice, onUpdate }: InvoiceFormProps) {
           <CardContent className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="cgst">CGST (%)</Label>
-              <Input id="cgst" type="number" {...register('cgst', { valueAsNumber: true })} placeholder="e.g., 9" />
+              <Input id="cgst" type="number" {...register('cgst', { valueAsNumber: true })} placeholder="e.g., 2.5" />
             </div>
             <div>
               <Label htmlFor="sgst">SGST (%)</Label>
-              <Input id="sgst" type="number" {...register('sgst', { valueAsNumber: true })} placeholder="e.g., 9" />
+              <Input id="sgst" type="number" {...register('sgst', { valueAsNumber: true })} placeholder="e.g., 2.5" />
             </div>
           </CardContent>
         </Card>
