@@ -10,15 +10,14 @@ import { useToast } from '@/hooks/use-toast';
 import { FilePlus2, ReceiptText } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import { ScrollArea } from '@/components/ui/scroll-area';
 
 const getInitialInvoice = (): Invoice => ({
   id: nanoid(),
   customerName: '',
   invoiceDate: new Date().toISOString().split('T')[0],
   items: [{ id: nanoid(), description: 'Cotten PANT', quantity: 1, rate: 0 }],
-  cgst: 9,
-  sgst: 9,
+  cgst: 2.5,
+  sgst: 2.5,
 });
 
 export default function Home() {
