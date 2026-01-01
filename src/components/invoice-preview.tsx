@@ -48,7 +48,6 @@ export function InvoicePreview({ invoice, onPrint }: InvoicePreviewProps) {
                         <p className="print-text-black">Mfrs. & Wholesale : All types of Jeans & Cotton Pa</p>
                     </div>
                     <div className="text-right">
-                        <p className="text-3xl font-bold print-text-black">BILL</p>
                         <p className="text-sm print-text-black mt-1">Date: {invoice.invoiceDate ? new Date(invoice.invoiceDate).toLocaleDateString('en-GB') : 'N/A'}</p>
                     </div>
                 </div>
