@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useCallback } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { useForm, useFieldArray, useWatch, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -42,13 +42,16 @@ function debounce<T extends (...args: any[]) => void>(func: T, delay: number) {
   };
 }
 
-function FormStateUpdater({ onUpdate }: { onUpdate: (data: Invoice) => void }) {
-    const data = useWatch();
+function FormStateUpdater({ onUpdate, control }: { onUpdate: (data: Invoice) => void, control: any }) {
+    const data = useWatch({ control });
     const debouncedOnUpdate = useCallback(debounce(onUpdate, 300), [onUpdate]);
   
     useEffect(() => {
-        debouncedOnUpdate(data);
-    }, [data, debouncedOnUpdate]);
+        const subscription = useWatch({ control }).subscribe(value => {
+            debouncedOnUpdate(value as Invoice);
+        });
+        return () => subscription.unsubscribe();
+    }, [control, debouncedOnUpdate]);
   
     return null;
 }
@@ -78,7 +81,7 @@ export function InvoiceForm({ invoice, onUpdate }: InvoiceFormProps) {
   return (
     <FormProvider {...formMethods}>
       <form className="space-y-6">
-        <FormStateUpdater onUpdate={onUpdate} />
+        <FormStateUpdater onUpdate={onUpdate} control={control} />
         <Card className="shadow-md">
           <CardHeader>
             <CardTitle>Customer Details</CardTitle>
