@@ -1,12 +1,12 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useForm, useFieldArray, Controller } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { nanoid } from 'nanoid';
 
-import type { Invoice, InvoiceItem } from '@/lib/types';
+import type { Invoice } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -38,7 +38,6 @@ export function InvoiceForm({ invoice, onUpdate }: InvoiceFormProps) {
   const {
     register,
     control,
-    handleSubmit,
     watch,
     reset,
     formState: { errors },
@@ -134,7 +133,7 @@ export function InvoiceForm({ invoice, onUpdate }: InvoiceFormProps) {
             <Button
                 type="button"
                 variant="outline"
-                onClick={() => append({ id: nanoid(), description: 'PANT', quantity: 1, rate: 0 })}
+                onClick={() => append({ id: nanoid(), description: 'Cotton PANT', quantity: 1, rate: 0 })}
                 className="w-full"
             >
                 <PlusCircle className="mr-2 h-4 w-4" />

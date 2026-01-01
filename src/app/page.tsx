@@ -16,7 +16,7 @@ const getInitialInvoice = (): Invoice => ({
   id: nanoid(),
   customerName: '',
   invoiceDate: new Date().toISOString().split('T')[0],
-  items: [{ id: nanoid(), description: 'PANT', quantity: 1, rate: 0 }],
+  items: [{ id: nanoid(), description: 'Cotton PANT', quantity: 1, rate: 0 }],
   cgst: 9,
   sgst: 9,
 });
