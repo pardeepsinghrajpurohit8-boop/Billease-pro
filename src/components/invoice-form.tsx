@@ -21,7 +21,6 @@ interface InvoiceFormProps {
 
 const invoiceSchema = z.object({
   id: z.string(),
-  invoiceNumber: z.string(),
   invoiceDate: z.string(),
   customerName: z.string().min(1, 'Customer name is required'),
   items: z.array(
@@ -81,7 +80,7 @@ export function InvoiceForm({ invoice, onUpdate }: InvoiceFormProps) {
               {errors.customerName && <p className="text-destructive text-sm mt-1">{errors.customerName.message}</p>}
             </div>
             <div>
-              <Label htmlFor="invoiceDate">Invoice Date</Label>
+              <Label htmlFor="invoiceDate">Bill Date</Label>
               <Input id="invoiceDate" type="date" {...register('invoiceDate')} />
             </div>
           </div>
@@ -90,7 +89,7 @@ export function InvoiceForm({ invoice, onUpdate }: InvoiceFormProps) {
       
       <Card>
         <CardHeader>
-          <CardTitle>Invoice Items</CardTitle>
+          <CardTitle>Bill Items</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
             <div className='hidden md:grid grid-cols-12 gap-4 items-center mb-2'>

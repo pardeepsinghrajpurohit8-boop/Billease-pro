@@ -7,23 +7,12 @@ import { InvoiceForm } from '@/components/invoice-form';
 import { InvoicePreview } from '@/components/invoice-preview';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { FilePlus2, BookOpen, Trash2 } from 'lucide-react';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
+import { FilePlus2 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
 const getInitialInvoice = (): Invoice => ({
   id: nanoid(),
-  invoiceNumber: String(Math.floor(Math.random() * 10000)).padStart(4, '0'),
   customerName: '',
   invoiceDate: new Date().toISOString().split('T')[0],
   items: [{ id: nanoid(), description: '', quantity: 1, rate: 0 }],
@@ -33,45 +22,22 @@ const getInitialInvoice = (): Invoice => ({
 
 export default function Home() {
   const [invoice, setInvoice] = useState<Invoice>(getInitialInvoice());
-  const [savedInvoices, setSavedInvoices] = useState<Invoice[]>([]);
   const [isMounted, setIsMounted] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     setIsMounted(true);
-    try {
-      const storedInvoices = localStorage.getItem('savedInvoices');
-      if (storedInvoices) {
-        setSavedInvoices(JSON.parse(storedInvoices));
-      }
-    } catch (error) {
-      console.error('Failed to load invoices from localStorage', error);
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Could not load saved invoices.',
-      });
-    }
-  }, [toast]);
+  }, []);
 
   const handleUpdate = useCallback((newInvoiceData: Invoice) => {
     setInvoice(newInvoiceData);
   }, []);
 
   const handleSave = () => {
-    const existingIndex = savedInvoices.findIndex((inv) => inv.id === invoice.id);
-    let newSavedInvoices;
-    if (existingIndex !== -1) {
-      newSavedInvoices = [...savedInvoices];
-      newSavedInvoices[existingIndex] = invoice;
-    } else {
-      newSavedInvoices = [...savedInvoices, invoice];
-    }
-    setSavedInvoices(newSavedInvoices);
-    localStorage.setItem('savedInvoices', JSON.stringify(newSavedInvoices));
+    // This functionality is currently not used but can be expanded later.
     toast({
-      title: 'Invoice Saved',
-      description: `Invoice for ${invoice.customerName || 'N/A'} has been saved.`,
+      title: 'Action Triggered',
+      description: 'Save functionality can be implemented here.',
       className: 'bg-accent text-accent-foreground',
     });
   };
@@ -79,8 +45,8 @@ export default function Home() {
   const handleNew = () => {
     setInvoice(getInitialInvoice());
     toast({
-      title: 'New Invoice',
-      description: 'New invoice form has been created.',
+      title: 'New Bill',
+      description: 'New bill form has been created.',
     });
   };
 
@@ -104,7 +70,7 @@ export default function Home() {
         }
 
         pdf.addImage(imgData, 'PNG', 0, 0, width, finalHeight);
-        pdf.save('invoice.pdf');
+        pdf.save('bill.pdf');
       });
     }
   };
@@ -122,7 +88,7 @@ export default function Home() {
         </div>
         <div className="flex items-center gap-2">
           <Button onClick={handleNew} variant="outline">
-            <FilePlus2 className="mr-2 h-4 w-4" /> New Invoice
+            <FilePlus2 className="mr-2 h-4 w-4" /> New Bill
           </Button>
         </div>
       </header>

@@ -21,7 +21,7 @@ const formatCurrency = (amount: number) => {
   }).format(amount);
 };
 
-export function InvoicePreview({ invoice, onSave, onPrint }: InvoicePreviewProps) {
+export function InvoicePreview({ invoice, onPrint }: InvoicePreviewProps) {
   const calculations = useMemo(() => {
     const subtotal = invoice.items.reduce((acc, item) => acc + (item.quantity || 0) * (item.rate || 0), 0);
     const cgstAmount = subtotal * ((invoice.cgst || 0) / 100);
@@ -35,31 +35,30 @@ export function InvoicePreview({ invoice, onSave, onPrint }: InvoicePreviewProps
   return (
     <div className="w-full max-w-4xl mx-auto">
         <div className="flex justify-end gap-2 mb-4 no-print">
-            <Button onClick={onSave} variant="outline">
-                <Save className="mr-2 h-4 w-4" /> Save
-            </Button>
             <Button onClick={onPrint} variant="default">
                 <Download className="mr-2 h-4 w-4" /> Download PDF
             </Button>
         </div>
-        <Card id="invoice-preview" className="print-bg-white print-text-black w-full shadow-lg">
-            <CardHeader className="bg-muted/30 print-bg-white p-6">
+        <Card id="invoice-preview" className="print-bg-white print-text-black w-full shadow-lg rounded-xl">
+            <CardHeader className="bg-primary/10 print-bg-white p-8 rounded-t-xl">
                 <div className="flex justify-between items-start mb-6">
                     <div className="flex items-center gap-4">
-                        <Building className="h-12 w-12 text-primary" />
+                        <div className="bg-primary p-3 rounded-full">
+                           <Building className="h-8 w-8 text-primary-foreground" />
+                        </div>
                         <div>
-                            <h1 className="text-2xl font-bold text-primary">MATESHWARI EXPORTS</h1>
-                            <p className="text-muted-foreground text-sm">Mfrs. & Wholesale : All types of Jeans & Cotton Pa</p>
+                            <h1 className="text-3xl font-bold text-primary">MATESHWARI EXPORTS</h1>
+                            <p className="text-muted-foreground">Mfrs. & Wholesale : All types of Jeans & Cotton Pa</p>
                             <p className="text-muted-foreground text-sm">Jaipur, Rajasthan</p>
                         </div>
                     </div>
                     <div className="text-right">
-                        <p className="text-sm"><span className="font-semibold text-muted-foreground">Invoice #:</span> {invoice.invoiceNumber || 'N/A'}</p>
-                        <p className="text-sm"><span className="font-semibold text-muted-foreground">Date:</span> {invoice.invoiceDate ? new Date(invoice.invoiceDate).toLocaleDateString() : 'N/A'}</p>
+                        <p className="text-lg font-semibold text-primary">Bill</p>
+                        <p className="text-sm text-muted-foreground">Date: {invoice.invoiceDate ? new Date(invoice.invoiceDate).toLocaleDateString() : 'N/A'}</p>
                     </div>
                 </div>
                 
-                <Separator className="my-4" />
+                <Separator className="my-4 bg-primary/20" />
                 
                 <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
@@ -72,32 +71,32 @@ export function InvoicePreview({ invoice, onSave, onPrint }: InvoicePreviewProps
                 <Table>
                     <TableHeader className="bg-muted/50 print-border-gray">
                         <TableRow>
-                            <TableHead className="w-[60px] text-center">S.No.</TableHead>
-                            <TableHead>Item Description</TableHead>
-                            <TableHead className="text-right">Quantity</TableHead>
-                            <TableHead className="text-right">Rate</TableHead>
-                            <TableHead className="text-right">Amount</TableHead>
+                            <TableHead className="w-[60px] text-center font-bold text-primary">S.No.</TableHead>
+                            <TableHead className="font-bold text-primary">Item Description</TableHead>
+                            <TableHead className="text-right font-bold text-primary">Quantity</TableHead>
+                            <TableHead className="text-right font-bold text-primary">Rate</TableHead>
+                            <TableHead className="text-right font-bold text-primary">Amount</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {invoice.items.map((item, index) => (
-                            <TableRow key={item.id} className="print-border-gray">
-                                <TableCell className="text-center">{index + 1}</TableCell>
-                                <TableCell className="font-medium">{item.description || 'Not specified'}</TableCell>
-                                <TableCell className="text-right">{item.quantity || 0}</TableCell>
-                                <TableCell className="text-right">{formatCurrency(item.rate || 0)}</TableCell>
-                                <TableCell className="text-right font-medium">{formatCurrency((item.quantity || 0) * (item.rate || 0))}</TableCell>
+                            <TableRow key={item.id} className="print-border-gray border-b">
+                                <TableCell className="text-center py-4">{index + 1}</TableCell>
+                                <TableCell className="font-medium py-4">{item.description || 'Not specified'}</TableCell>
+                                <TableCell className="text-right py-4">{item.quantity || 0}</TableCell>
+                                <TableCell className="text-right py-4">{formatCurrency(item.rate || 0)}</TableCell>
+                                <TableCell className="text-right font-medium py-4">{formatCurrency((item.quantity || 0) * (item.rate || 0))}</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
                 </Table>
                 {invoice.items.length === 0 || (invoice.items.length === 1 && !invoice.items[0].description) ? (
                     <div className="text-center p-12 text-muted-foreground">
-                        <p>Add items to the invoice to see them here.</p>
+                        <p>Add items to the bill to see them here.</p>
                     </div>
                 ) : null}
             </CardContent>
-            <CardFooter className="p-6 bg-muted/30 print-bg-white flex-col items-end">
+            <CardFooter className="p-8 bg-primary/10 print-bg-white flex-col items-end rounded-b-xl">
                 <div className="w-full max-w-sm space-y-2 text-sm mb-4">
                     <div className="flex justify-between">
                         <span className="text-muted-foreground">Subtotal</span>
@@ -111,13 +110,13 @@ export function InvoicePreview({ invoice, onSave, onPrint }: InvoicePreviewProps
                         <span className="text-muted-foreground">SGST ({invoice.sgst || 0}%)</span>
                         <span className="font-medium">{formatCurrency(sgstAmount)}</span>
                     </div>
-                    <Separator className="my-2" />
-                    <div className="flex justify-between items-center text-lg">
+                    <Separator className="my-2 bg-primary/20" />
+                    <div className="flex justify-between items-center text-xl">
                         <span className="font-bold">Grand Total</span>
                         <span className="font-bold text-accent">{formatCurrency(grandTotal)}</span>
                     </div>
                 </div>
-                <Separator className="my-4" />
+                <Separator className="my-4 bg-primary/20" />
                 <div className="text-center w-full text-muted-foreground text-xs">
                     <p>Thank you for your business!</p>
                 </div>
