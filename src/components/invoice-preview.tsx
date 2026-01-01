@@ -45,11 +45,11 @@ export function InvoicePreview({ invoice, onPrint }: InvoicePreviewProps) {
                 <div className="flex justify-between items-start">
                     <div>
                         <h1 className="text-2xl font-extrabold tracking-tight text-destructive">MATESHWARI EXPORTS</h1>
-                        <p className="text-muted-foreground">Mfrs. & Wholesale : All types of Jeans & Cotton Pa</p>
+                        <p className="print-text-black">Mfrs. & Wholesale : All types of Jeans & Cotton Pa</p>
                     </div>
                     <div className="text-right">
-                        <p className="text-3xl font-bold text-primary/80">BILL</p>
-                        <p className="text-sm text-muted-foreground mt-1">Date: {invoice.invoiceDate ? new Date(invoice.invoiceDate).toLocaleDateString('en-GB') : 'N/A'}</p>
+                        <p className="text-3xl font-bold print-text-black">BILL</p>
+                        <p className="text-sm print-text-black mt-1">Date: {invoice.invoiceDate ? new Date(invoice.invoiceDate).toLocaleDateString('en-GB') : 'N/A'}</p>
                     </div>
                 </div>
                 
@@ -57,8 +57,8 @@ export function InvoicePreview({ invoice, onPrint }: InvoicePreviewProps) {
                 
                 <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                        <p className="font-semibold text-muted-foreground mb-1">Bill To:</p>
-                        <p className="font-bold text-lg text-primary">{invoice.customerName || 'Customer Name'}</p>
+                        <p className="font-semibold print-text-black mb-1">Bill To:</p>
+                        <p className="font-bold text-lg print-text-black">{invoice.customerName || 'Customer Name'}</p>
                     </div>
                 </div>
             </header>
@@ -66,11 +66,11 @@ export function InvoicePreview({ invoice, onPrint }: InvoicePreviewProps) {
                 <Table>
                     <TableHeader className="bg-muted/50 print-border-gray">
                         <TableRow className="border-b-primary/10">
-                            <TableHead className="w-[80px] text-center font-bold text-primary/90">S.No.</TableHead>
-                            <TableHead className="font-bold text-primary/90">Item Description</TableHead>
-                            <TableHead className="text-right font-bold text-primary/90">Quantity</TableHead>
-                            <TableHead className="text-right font-bold text-primary/90">Rate</TableHead>
-                            <TableHead className="text-right font-bold text-primary/90">Amount</TableHead>
+                            <TableHead className="w-[80px] text-center font-bold print-text-black">S.No.</TableHead>
+                            <TableHead className="font-bold print-text-black">Item Description</TableHead>
+                            <TableHead className="text-right font-bold print-text-black">Quantity</TableHead>
+                            <TableHead className="text-right font-bold print-text-black">Rate</TableHead>
+                            <TableHead className="text-right font-bold print-text-black">Amount</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -78,7 +78,7 @@ export function InvoicePreview({ invoice, onPrint }: InvoicePreviewProps) {
                             invoice.items.map((item, index) => (
                                 <TableRow key={item.id} className="print-border-gray border-b-muted/50">
                                     <TableCell className="text-center py-4 font-medium print-text-black">{index + 1}</TableCell>
-                                    <TableCell className="font-medium py-4">{item.description || 'Not specified'}</TableCell>
+                                    <TableCell className="font-medium py-4 print-text-black">{item.description || 'Not specified'}</TableCell>
                                     <TableCell className="text-right py-4 print-text-black">{item.quantity || 0}</TableCell>
                                     <TableCell className="text-right py-4 print-text-black">{formatCurrency(item.rate || 0)}</TableCell>
                                     <TableCell className="text-right font-semibold py-4 print-text-black">{formatCurrency((item.quantity || 0) * (item.rate || 0))}</TableCell>
@@ -100,20 +100,20 @@ export function InvoicePreview({ invoice, onPrint }: InvoicePreviewProps) {
                 <div className="flex justify-end">
                   <div className="w-full max-w-xs space-y-3 text-sm">
                       <div className="flex justify-between">
-                          <span className="text-muted-foreground">Subtotal</span>
+                          <span className="print-text-black">Subtotal</span>
                           <span className="font-medium print-text-black">{formatCurrency(subtotal)}</span>
                       </div>
                       <div className="flex justify-between">
-                          <span className="text-muted-foreground">CGST ({invoice.cgst || 0}%)</span>
+                          <span className="print-text-black">CGST ({invoice.cgst || 0}%)</span>
                           <span className="font-medium print-text-black">{formatCurrency(cgstAmount)}</span>
                       </div>
                       <div className="flex justify-between">
-                          <span className="text-muted-foreground">SGST ({invoice.sgst || 0}%)</span>
+                          <span className="print-text-black">SGST ({invoice.sgst || 0}%)</span>
                           <span className="font-medium print-text-black">{formatCurrency(sgstAmount)}</span>
                       </div>
                       <Separator className="my-2 bg-primary/10" />
                       <div className="flex justify-between items-center">
-                          <span className="font-bold text-lg text-primary">Grand Total</span>
+                          <span className="font-bold text-lg print-text-black">Grand Total</span>
                           <span className="font-bold text-xl print-text-black">{formatCurrency(grandTotal)}</span>
                       </div>
                   </div>
