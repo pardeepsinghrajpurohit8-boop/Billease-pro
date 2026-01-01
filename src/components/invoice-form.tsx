@@ -42,13 +42,16 @@ function debounce<T extends (...args: any[]) => void>(func: T, delay: number) {
   };
 }
 
-function FormStateUpdater({ control, onUpdate }: { control: any, onUpdate: (data: Invoice) => void }) {
-    const watchedData = useWatch({ control });
+function FormStateUpdater({ onUpdate }: { onUpdate: (data: Invoice) => void }) {
+    const watchedData = useWatch();
     const debouncedOnUpdate = useCallback(debounce(onUpdate, 300), [onUpdate]);
 
     useEffect(() => {
-        debouncedOnUpdate(watchedData);
-    }, [watchedData, debouncedOnUpdate]);
+        const subscription = useWatch({}).subscribe(value => {
+            debouncedOnUpdate(value as Invoice);
+        });
+        return () => subscription.unsubscribe();
+    }, [debouncedOnUpdate]);
 
     return null;
 }
@@ -78,7 +81,7 @@ export function InvoiceForm({ invoice, onUpdate }: InvoiceFormProps) {
   return (
     <FormProvider {...formMethods}>
       <form className="space-y-6" onChange={(e) => e.stopPropagation()}>
-        <FormStateUpdater onUpdate={onUpdate} control={control} />
+        <FormStateUpdater onUpdate={onUpdate} />
         <Card className="shadow-md">
           <CardHeader>
             <CardTitle>Customer Details</CardTitle>
