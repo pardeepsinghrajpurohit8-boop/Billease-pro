@@ -16,7 +16,7 @@ const getInitialInvoice = (): Invoice => ({
   id: nanoid(),
   customerName: '',
   invoiceDate: new Date().toISOString().split('T')[0],
-  items: [{ id: nanoid(), description: '', quantity: 1, rate: 0 }],
+  items: [{ id: nanoid(), description: 'PANT', quantity: 1, rate: 0 }],
   cgst: 9,
   sgst: 9,
 });
@@ -99,7 +99,7 @@ export default function Home() {
           <InvoiceForm invoice={invoice} onUpdate={handleUpdate} />
         </ScrollArea>
 
-        <div className="lg:col-span-3 md:col-span-1 bg-background p-4 sm:p-8 flex justify-center items-start overflow-y-auto">
+        <div className="lg:col-span-3 md:col-span-1 bg-muted/30 p-4 sm:p-8 flex justify-center items-start overflow-y-auto">
           <InvoicePreview invoice={invoice} onSave={handleSave} onPrint={handlePrint} />
         </div>
       </div>

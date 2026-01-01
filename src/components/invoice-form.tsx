@@ -140,7 +140,7 @@ export function InvoiceForm({ invoice, onUpdate }: InvoiceFormProps) {
             <Button
                 type="button"
                 variant="outline"
-                onClick={() => append({ id: nanoid(), description: '', quantity: 1, rate: 0 })}
+                onClick={() => append({ id: nanoid(), description: 'PANT', quantity: 1, rate: 0 })}
                 className="w-full"
             >
                 <PlusCircle className="mr-2 h-4 w-4" />
