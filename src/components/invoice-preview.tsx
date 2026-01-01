@@ -64,7 +64,7 @@ export function InvoicePreview({ invoice, onPrint }: InvoicePreviewProps) {
             <main className="p-0 border-t border-primary/20 print-border-gray">
                 <Table>
                     <TableHeader className="bg-muted/50 print-border-gray">
-                        <TableRow className="border-b-primary/20 print-border-gray">
+                        <TableRow className="border-b border-black print-border-gray">
                             <TableHead className="w-[80px] text-center font-bold text-black">S.No.</TableHead>
                             <TableHead className="font-bold text-black">Item Description</TableHead>
                             <TableHead className="text-right font-bold text-black">Quantity</TableHead>
@@ -75,7 +75,7 @@ export function InvoicePreview({ invoice, onPrint }: InvoicePreviewProps) {
                     <TableBody>
                         {invoice.items.length > 0 && invoice.items.some(i => i.description) ? (
                             invoice.items.map((item, index) => (
-                                <TableRow key={item.id} className="border-b border-primary/10 print-border-gray">
+                                <TableRow key={item.id} className="border-b border-black/20 print-border-gray">
                                     <TableCell className="text-center py-4 font-medium text-black">{index + 1}</TableCell>
                                     <TableCell className="font-medium py-4 text-black">{item.description || 'Not specified'}</TableCell>
                                     <TableCell className="text-right py-4 text-black">{item.quantity || 0}</TableCell>
@@ -95,7 +95,7 @@ export function InvoicePreview({ invoice, onPrint }: InvoicePreviewProps) {
                     </TableBody>
                 </Table>
             </main>
-            <footer className="p-8 bg-primary/5 print-bg-white border-t border-primary/20 print-border-gray">
+            <footer className="p-8 bg-primary/5 print-bg-white border-t border-black print-border-gray">
                 <div className="flex justify-end">
                   <div className="w-full max-w-xs space-y-3 text-sm">
                       <div className="flex justify-between">
@@ -110,7 +110,7 @@ export function InvoicePreview({ invoice, onPrint }: InvoicePreviewProps) {
                           <span className="text-black">SGST ({invoice.sgst || 0}%)</span>
                           <span className="font-medium text-black">{formatCurrency(sgstAmount)}</span>
                       </div>
-                      <Separator className="my-2 bg-primary/20 print-border-gray" />
+                      <Separator className="my-2 bg-black print-border-gray" />
                       <div className="flex justify-between items-center">
                           <span className="font-bold text-lg text-black">Grand Total</span>
                           <span className="font-bold text-xl text-black">{formatCurrency(grandTotal)}</span>
