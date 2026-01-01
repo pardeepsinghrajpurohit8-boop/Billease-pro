@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useCallback } from 'react';
-import { useForm, useFieldArray, FormProvider, useFormContext, useWatch } from 'react-hook-form';
+import { useForm, useFieldArray, FormProvider, useWatch, Control } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { nanoid } from 'nanoid';
@@ -25,7 +25,6 @@ const invoiceSchema = z.object({
   items: z.array(
     z.object({
       id: z.string(),
-      description: z.string().min(1, 'Description is required'),
       quantity: z.number().min(0, 'Quantity must be non-negative'),
       rate: z.number().min(0, 'Rate must be non-negative'),
     })
@@ -42,17 +41,15 @@ function debounce<F extends (...args: any[]) => any>(func: F, waitFor: number) {
   };
 }
 
-function FormStateUpdater({ onUpdate }: { onUpdate: (data: Invoice) => void }) {
-    const { control } = useFormContext();
+function FormStateUpdater({ control, onUpdate }: { control: Control<Invoice>, onUpdate: (data: Invoice) => void }) {
+    const data = useWatch({ control });
     const debouncedOnUpdate = useCallback(debounce(onUpdate, 500), [onUpdate]);
 
-    const watchedData = useWatch({ control });
-
     useEffect(() => {
-        if (watchedData) {
-            debouncedOnUpdate(watchedData as Invoice);
+        if (data) {
+            debouncedOnUpdate(data as Invoice);
         }
-    }, [watchedData, debouncedOnUpdate]);
+    }, [data, debouncedOnUpdate]);
 
     return null;
 }
@@ -61,7 +58,6 @@ export function InvoiceForm({ invoice, onUpdate }: InvoiceFormProps) {
   const formMethods = useForm<Invoice>({
     resolver: zodResolver(invoiceSchema),
     defaultValues: invoice,
-    mode: 'onChange',
   });
 
   const {
@@ -82,8 +78,8 @@ export function InvoiceForm({ invoice, onUpdate }: InvoiceFormProps) {
   
   return (
     <FormProvider {...formMethods}>
-        <FormStateUpdater onUpdate={onUpdate} />
-        <div className="space-y-6">
+        <FormStateUpdater control={control} onUpdate={onUpdate} />
+        <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
             <Card className="shadow-md">
             <CardHeader>
                 <CardTitle>Customer Details</CardTitle>
@@ -115,18 +111,11 @@ export function InvoiceForm({ invoice, onUpdate }: InvoiceFormProps) {
                         <div className='col-span-12'>
                             <Label>Item #{index + 1}</Label>
                         </div>
-                        <div className='col-span-12'>
-                            <Label className='sr-only'>Description</Label>
-                            <Input
-                                placeholder="Item description"
-                                {...register(`items.${index}.description`)}
-                            />
-                            {errors.items?.[index]?.description && <p className="text-destructive text-sm mt-1">{errors.items[index]?.description?.message}</p>}
-                        </div>
 
                         <div className='col-span-6'>
-                            <Label className='sr-only'>Quantity</Label>
+                            <Label htmlFor={`items.${index}.quantity`}>Quantity</Label>
                             <Input
+                                id={`items.${index}.quantity`}
                                 type="number"
                                 placeholder="Quantity"
                                 {...register(`items.${index}.quantity`, { valueAsNumber: true })}
@@ -134,8 +123,9 @@ export function InvoiceForm({ invoice, onUpdate }: InvoiceFormProps) {
                         </div>
                         
                         <div className='col-span-6'>
-                            <Label className='sr-only'>Rate</Label>
+                            <Label htmlFor={`items.${index}.rate`}>Rate</Label>
                             <Input
+                                id={`items.${index}.rate`}
                                 type="number"
                                 placeholder="Rate"
                                 {...register(`items.${index}.rate`, { valueAsNumber: true })}
@@ -153,7 +143,7 @@ export function InvoiceForm({ invoice, onUpdate }: InvoiceFormProps) {
                 <Button
                     type="button"
                     variant="outline"
-                    onClick={() => append({ id: nanoid(), description: '', quantity: 1, rate: 0 })}
+                    onClick={() => append({ id: nanoid(), quantity: 1, rate: 0 })}
                     className="w-full"
                 >
                     <PlusCircle className="mr-2 h-4 w-4" />
@@ -178,7 +168,7 @@ export function InvoiceForm({ invoice, onUpdate }: InvoiceFormProps) {
                 </div>
             </CardContent>
             </Card>
-        </div>
+        </form>
     </FormProvider>
   );
 }

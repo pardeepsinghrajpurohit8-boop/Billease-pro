@@ -63,52 +63,49 @@ export function InvoicePreview({ invoice, onPrint }: InvoicePreviewProps) {
             </Button>
         </div>
         <Card id="invoice-preview" className="print-bg-white print-text-black w-full shadow-lg rounded-none overflow-hidden border">
-            <header className="p-6 print-bg-white">
+            <header className="p-4 print-bg-white">
                 <div className="flex justify-between items-start">
                     <div>
-                        <h1 className="text-2xl font-extrabold tracking-tight text-red-600">MATESHWARI EXPORTS</h1>
-                        <p className="text-black text-xs">Mfrs. & Wholesale : All types of Jeans & Cotton PANT</p>
+                        <h1 className="text-xl font-extrabold tracking-tight text-red-600">MATESHWARI EXPORTS</h1>
+                        <p className="text-black text-xs">Mfrs. & Wholesale : All types of Jeans</p>
                     </div>
                     <div className="text-right">
-                        <p className="font-bold text-black text-xl">BILL</p>
                         <p className="text-sm text-black mt-1">Date: {invoice.invoiceDate ? new Date(invoice.invoiceDate).toLocaleDateString('en-GB') : 'N/A'}</p>
                     </div>
                 </div>
                 
-                <Separator className="my-4 bg-gray-300 print-border-gray" />
+                <Separator className="my-3 bg-gray-300 print-border-gray" />
                 
                 <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                         <p className="font-semibold text-black mb-1">Bill To:</p>
-                        <p className="font-bold text-lg text-black">{invoice.customerName || 'Customer Name'}</p>
+                        <p className="font-bold text-base text-black">{invoice.customerName || 'Customer Name'}</p>
                     </div>
                 </div>
             </header>
-            <main className="px-6 py-2 border-t border-gray-300 print-border-gray">
+            <main className="px-4 border-t border-gray-300 print-border-gray">
                 <Table>
                     <TableHeader className="print-border-gray">
-                        <TableRow className="border-b-2 border-black print-border-gray">
-                            <TableHead className="w-[50px] text-center font-bold text-black px-2">S.No.</TableHead>
-                            <TableHead className="font-bold text-black px-2">Item Description</TableHead>
-                            <TableHead className="text-right font-bold text-black px-2">Quantity</TableHead>
-                            <TableHead className="text-right font-bold text-black px-2">Rate</TableHead>
-                            <TableHead className="text-right font-bold text-black px-2">Amount</TableHead>
+                        <TableRow className="border-b border-black print-border-gray">
+                            <TableHead className="w-[50px] text-center font-bold text-black p-2 h-8">S.No.</TableHead>
+                            <TableHead className="text-right font-bold text-black p-2 h-8">Quantity</TableHead>
+                            <TableHead className="text-right font-bold text-black p-2 h-8">Rate</TableHead>
+                            <TableHead className="text-right font-bold text-black p-2 h-8">Amount</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {invoice.items.length > 0 && invoice.items.some(i => i.description) ? (
+                        {invoice.items.length > 0 && invoice.items.some(i => i.quantity > 0 || i.rate > 0) ? (
                             invoice.items.map((item, index) => (
-                                <TableRow key={item.id} className="border-0">
-                                    <TableCell className="text-center py-1 font-medium text-black px-2">{index + 1}</TableCell>
-                                    <TableCell className="font-medium py-1 text-black px-2">{item.description || 'Not specified'}</TableCell>
-                                    <TableCell className="text-right py-1 text-black px-2">{item.quantity || 0}</TableCell>
-                                    <TableCell className="text-right py-1 text-black px-2">{formatCurrency(item.rate || 0)}</TableCell>
-                                    <TableCell className="text-right font-semibold py-1 text-black px-2">{formatCurrency((item.quantity || 0) * (item.rate || 0))}</TableCell>
+                                <TableRow key={item.id} className="border-0 border-b border-gray-300">
+                                    <TableCell className="text-center p-2 font-medium text-black align-top h-8">{index + 1}</TableCell>
+                                    <TableCell className="text-right p-2 text-black align-top h-8">{item.quantity || 0}</TableCell>
+                                    <TableCell className="text-right p-2 text-black align-top h-8">{formatCurrency(item.rate || 0)}</TableCell>
+                                    <TableCell className="text-right font-semibold p-2 text-black align-top h-8">{formatCurrency((item.quantity || 0) * (item.rate || 0))}</TableCell>
                                 </TableRow>
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={5} className="text-center p-8 text-muted-foreground border-x-0">
+                                <TableCell colSpan={4} className="text-center p-8 text-muted-foreground border-x-0">
                                     <FileText className="mx-auto h-10 w-10 text-muted-foreground/50 mb-4" />
                                     <p>Your bill items will appear here.</p>
                                     <p className="text-sm">Start by adding items using the form.</p>
@@ -119,7 +116,7 @@ export function InvoicePreview({ invoice, onPrint }: InvoicePreviewProps) {
                 </Table>
             </main>
 
-            <div className="px-6 py-2 border-t-2 border-black">
+            <div className="px-4 py-2 border-t-2 border-black">
                 <div className="grid grid-cols-12">
                     <div className="col-span-7 pr-4">
                         <p className="font-bold text-sm">Total in words:</p>
