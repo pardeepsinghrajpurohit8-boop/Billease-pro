@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useForm, useFieldArray, useWatch, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -42,15 +42,16 @@ function debounce<T extends (...args: any[]) => void>(func: T, delay: number) {
   };
 }
 
-function FormStateUpdater({ onUpdate, control }: { onUpdate: (data: Invoice) => void, control: any }) {
+function FormStateUpdater({ control, onUpdate }: { control: any, onUpdate: (data: Invoice) => void }) {
     const watchedData = useWatch({ control });
     const debouncedOnUpdate = useCallback(debounce(onUpdate, 300), [onUpdate]);
 
     useEffect(() => {
-        if (watchedData) {
-            debouncedOnUpdate(watchedData as Invoice);
-        }
-    }, [watchedData, debouncedOnUpdate]);
+        const subscription = control.subscribe((value: any) => {
+            debouncedOnUpdate(value as Invoice);
+        });
+        return () => subscription.unsubscribe();
+    }, [control, debouncedOnUpdate]);
 
     return null;
 }
@@ -150,7 +151,7 @@ export function InvoiceForm({ invoice, onUpdate }: InvoiceFormProps) {
               <Button
                   type="button"
                   variant="outline"
-                  onClick={() => append({ id: nanoid(), description: 'Cotten PANT', quantity: 1, rate: 0 })}
+                  onClick={() => append({ id: nanoid(), description: '', quantity: 1, rate: 0 })}
                   className="w-full"
               >
                   <PlusCircle className="mr-2 h-4 w-4" />
