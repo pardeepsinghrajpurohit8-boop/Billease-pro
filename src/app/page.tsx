@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { nanoid } from 'nanoid';
 import type { Invoice } from '@/lib/types';
 import { InvoiceForm } from '@/components/invoice-form';
@@ -29,9 +29,9 @@ export default function Home() {
     setIsMounted(true);
   }, []);
 
-  const handleUpdate = (newInvoiceData: Invoice) => {
-    setInvoice(newInvoiceData);
-  };
+  const handleUpdate = useCallback((newInvoiceData: Partial<Invoice>) => {
+    setInvoice(prev => ({...prev, ...newInvoiceData}));
+  }, []);
 
   const handleNew = () => {
     setInvoice(getInitialInvoice());

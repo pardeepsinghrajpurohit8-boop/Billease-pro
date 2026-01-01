@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useCallback } from 'react';
-import { useForm, useFieldArray, FormProvider, useWatch, Control } from 'react-hook-form';
+import { useEffect } from 'react';
+import { useForm, useFieldArray, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { nanoid } from 'nanoid';
@@ -15,7 +15,7 @@ import { Trash2, PlusCircle } from 'lucide-react';
 
 interface InvoiceFormProps {
   invoice: Invoice;
-  onUpdate: (data: Invoice) => void;
+  onUpdate: (data: Partial<Invoice>) => void;
 }
 
 const invoiceSchema = z.object({
@@ -33,37 +33,18 @@ const invoiceSchema = z.object({
   sgst: z.number().min(0).max(100),
 });
 
-function debounce<F extends (...args: any[]) => any>(func: F, waitFor: number) {
-  let timeout: NodeJS.Timeout;
-  return (...args: Parameters<F>): void => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), waitFor);
-  };
-}
-
-function FormStateUpdater({ control, onUpdate }: { control: Control<Invoice>, onUpdate: (data: Invoice) => void }) {
-    const data = useWatch({ control });
-    const debouncedOnUpdate = useCallback(debounce(onUpdate, 500), [onUpdate]);
-
-    useEffect(() => {
-        if (data) {
-            debouncedOnUpdate(data as Invoice);
-        }
-    }, [data, debouncedOnUpdate]);
-
-    return null;
-}
-
 export function InvoiceForm({ invoice, onUpdate }: InvoiceFormProps) {
   const formMethods = useForm<Invoice>({
     resolver: zodResolver(invoiceSchema),
     defaultValues: invoice,
+    mode: 'onBlur',
   });
 
   const {
     register,
     control,
     reset,
+    handleSubmit,
     formState: { errors },
   } = formMethods;
 
@@ -75,11 +56,18 @@ export function InvoiceForm({ invoice, onUpdate }: InvoiceFormProps) {
   useEffect(() => {
     reset(invoice);
   }, [invoice, reset]);
+
+  const handleFormChange = (data: Invoice) => {
+    onUpdate(data);
+  };
   
   return (
     <FormProvider {...formMethods}>
-        <FormStateUpdater control={control} onUpdate={onUpdate} />
-        <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
+        <form 
+          onChange={handleSubmit(handleFormChange)}
+          onSubmit={(e) => e.preventDefault()} 
+          className="space-y-6"
+        >
             <Card className="shadow-md">
             <CardHeader>
                 <CardTitle>Customer Details</CardTitle>
@@ -143,7 +131,10 @@ export function InvoiceForm({ invoice, onUpdate }: InvoiceFormProps) {
                 <Button
                     type="button"
                     variant="outline"
-                    onClick={() => append({ id: nanoid(), quantity: 1, rate: 0 })}
+                    onClick={() => {
+                      append({ id: nanoid(), quantity: 1, rate: 0 });
+                      handleSubmit(handleFormChange)();
+                    }}
                     className="w-full"
                 >
                     <PlusCircle className="mr-2 h-4 w-4" />
