@@ -41,7 +41,7 @@ export function InvoicePreview({ invoice, onPrint }: InvoicePreviewProps) {
             </Button>
         </div>
         <Card id="invoice-preview" className="print-bg-white print-text-black w-full shadow-2xl rounded-2xl overflow-hidden border-2 border-black">
-            <header className="p-8 print-bg-white">
+            <header className="p-6 print-bg-white">
                 <div className="flex justify-between items-start">
                     <div>
                         <h1 className="text-2xl font-extrabold tracking-tight text-red-600">MATESHWARI EXPORTS</h1>
@@ -52,7 +52,7 @@ export function InvoicePreview({ invoice, onPrint }: InvoicePreviewProps) {
                     </div>
                 </div>
                 
-                <Separator className="my-6 bg-black print-border-gray" />
+                <Separator className="my-4 bg-black print-border-gray" />
                 
                 <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
@@ -65,27 +65,27 @@ export function InvoicePreview({ invoice, onPrint }: InvoicePreviewProps) {
                 <Table>
                     <TableHeader className="print-border-gray">
                         <TableRow className="border-b-2 border-black print-border-gray">
-                            <TableHead className="w-[80px] text-center font-bold text-black border-x border-black">S.No.</TableHead>
-                            <TableHead className="font-bold text-black border-r border-black">Item Description</TableHead>
-                            <TableHead className="text-right font-bold text-black border-r border-black">Quantity</TableHead>
-                            <TableHead className="text-right font-bold text-black border-r border-black">Rate</TableHead>
-                            <TableHead className="text-right font-bold text-black border-r border-black">Amount</TableHead>
+                            <TableHead className="w-[80px] text-center font-bold text-black border-x border-black px-2">S.No.</TableHead>
+                            <TableHead className="font-bold text-black border-r border-black px-2">Item Description</TableHead>
+                            <TableHead className="text-right font-bold text-black border-r border-black px-2">Quantity</TableHead>
+                            <TableHead className="text-right font-bold text-black border-r border-black px-2">Rate</TableHead>
+                            <TableHead className="text-right font-bold text-black border-r border-black px-2">Amount</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {invoice.items.length > 0 && invoice.items.some(i => i.description) ? (
                             invoice.items.map((item, index) => (
                                 <TableRow key={item.id} className="border-b border-black/20 print-border-gray">
-                                    <TableCell className="text-center py-4 font-medium text-black border-x border-black">{index + 1}</TableCell>
-                                    <TableCell className="font-medium py-4 text-black border-r border-black">{item.description || 'Not specified'}</TableCell>
-                                    <TableCell className="text-right py-4 text-black border-r border-black">{item.quantity || 0}</TableCell>
-                                    <TableCell className="text-right py-4 text-black border-r border-black">{formatCurrency(item.rate || 0)}</TableCell>
-                                    <TableCell className="text-right font-semibold py-4 text-black border-r border-black">{formatCurrency((item.quantity || 0) * (item.rate || 0))}</TableCell>
+                                    <TableCell className="text-center py-2 font-medium text-black border-x border-black px-2">{index + 1}</TableCell>
+                                    <TableCell className="font-medium py-2 text-black border-r border-black px-2">{item.description || 'Not specified'}</TableCell>
+                                    <TableCell className="text-right py-2 text-black border-r border-black px-2">{item.quantity || 0}</TableCell>
+                                    <TableCell className="text-right py-2 text-black border-r border-black px-2">{formatCurrency(item.rate || 0)}</TableCell>
+                                    <TableCell className="text-right font-semibold py-2 text-black border-r border-black px-2">{formatCurrency((item.quantity || 0) * (item.rate || 0))}</TableCell>
                                 </TableRow>
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={5} className="text-center p-12 text-muted-foreground border-x border-black">
+                                <TableCell colSpan={5} className="text-center p-8 text-muted-foreground border-x border-black">
                                     <FileText className="mx-auto h-10 w-10 text-muted-foreground/50 mb-4" />
                                     <p>Your bill items will appear here.</p>
                                     <p className="text-sm">Start by adding items using the form.</p>
@@ -93,29 +93,29 @@ export function InvoicePreview({ invoice, onPrint }: InvoicePreviewProps) {
                             </TableRow>
                         )}
                          <TableRow className="border-t-2 border-black">
-                            <TableCell colSpan={3} className="border-x border-black"></TableCell>
-                            <TableCell className="text-right font-bold text-black border-r border-black">Subtotal</TableCell>
-                            <TableCell className="text-right font-bold text-black border-r border-black">{formatCurrency(subtotal)}</TableCell>
+                            <TableCell colSpan={3} className="border-x border-black p-0"></TableCell>
+                            <TableCell className="text-right font-bold text-black border-r border-black px-2 py-1">Subtotal</TableCell>
+                            <TableCell className="text-right font-bold text-black border-r border-black px-2 py-1">{formatCurrency(subtotal)}</TableCell>
                         </TableRow>
                          <TableRow>
-                            <TableCell colSpan={3} className="border-x border-black"></TableCell>
-                            <TableCell className="text-right font-bold text-black border-r border-black">CGST ({invoice.cgst || 0}%)</TableCell>
-                            <TableCell className="text-right font-bold text-black border-r border-black">{formatCurrency(cgstAmount)}</TableCell>
+                            <TableCell colSpan={3} className="border-x border-black p-0"></TableCell>
+                            <TableCell className="text-right font-bold text-black border-r border-black px-2 py-1">CGST ({invoice.cgst || 0}%)</TableCell>
+                            <TableCell className="text-right font-bold text-black border-r border-black px-2 py-1">{formatCurrency(cgstAmount)}</TableCell>
                         </TableRow>
                          <TableRow>
-                            <TableCell colSpan={3} className="border-x border-black"></TableCell>
-                            <TableCell className="text-right font-bold text-black border-r border-black">SGST ({invoice.sgst || 0}%)</TableCell>
-                            <TableCell className="text-right font-bold text-black border-r border-black">{formatCurrency(sgstAmount)}</TableCell>
+                            <TableCell colSpan={3} className="border-x border-black p-0"></TableCell>
+                            <TableCell className="text-right font-bold text-black border-r border-black px-2 py-1">SGST ({invoice.sgst || 0}%)</TableCell>
+                            <TableCell className="text-right font-bold text-black border-r border-black px-2 py-1">{formatCurrency(sgstAmount)}</TableCell>
                         </TableRow>
                         <TableRow className="border-y-2 border-black bg-muted/50">
-                            <TableCell colSpan={3} className="border-x border-black"></TableCell>
-                            <TableCell className="text-right font-bold text-xl text-black border-r border-black">Grand Total</TableCell>
-                            <TableCell className="text-right font-bold text-xl text-black border-r border-black">{formatCurrency(grandTotal)}</TableCell>
+                            <TableCell colSpan={3} className="border-x border-black p-0"></TableCell>
+                            <TableCell className="text-right font-bold text-xl text-black border-r border-black px-2 py-2">Grand Total</TableCell>
+                            <TableCell className="text-right font-bold text-xl text-black border-r border-black px-2 py-2">{formatCurrency(grandTotal)}</TableCell>
                         </TableRow>
                     </TableBody>
                 </Table>
             </main>
-            <footer className="p-8 print-bg-white border-t border-black print-border-gray">
+            <footer className="p-6 print-bg-white border-t border-black print-border-gray">
                 <div className="text-center w-full text-xs">
                     <p className="font-semibold text-black">Thank you for your business!</p>
                     <p className="text-black">MATESHWARI EXPORTS</p>
