@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useForm, useFieldArray, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -46,6 +46,7 @@ export function InvoiceForm({ invoice, onUpdate }: InvoiceFormProps) {
     reset,
     handleSubmit,
     formState: { errors },
+    getValues
   } = formMethods;
 
   const { fields, append, remove } = useFieldArray({
@@ -57,14 +58,15 @@ export function InvoiceForm({ invoice, onUpdate }: InvoiceFormProps) {
     reset(invoice);
   }, [invoice, reset]);
 
-  const handleFormChange = (data: Invoice) => {
-    onUpdate(data);
+  const handleBlur = () => {
+    const values = getValues();
+    onUpdate(values);
   };
   
   return (
     <FormProvider {...formMethods}>
         <form 
-          onChange={handleSubmit(handleFormChange)}
+          onBlur={handleBlur}
           onSubmit={(e) => e.preventDefault()} 
           className="space-y-6"
         >
@@ -133,7 +135,8 @@ export function InvoiceForm({ invoice, onUpdate }: InvoiceFormProps) {
                     variant="outline"
                     onClick={() => {
                       append({ id: nanoid(), quantity: 1, rate: 0 });
-                      handleSubmit(handleFormChange)();
+                      // We can trigger an update after adding an item if needed
+                      setTimeout(() => handleBlur(), 0);
                     }}
                     className="w-full"
                 >
