@@ -61,7 +61,7 @@ export function InvoiceForm({ invoice, onUpdate }: InvoiceFormProps) {
     reset(invoice);
   }, [invoice, reset]);
 
-  const handleFormChange = () => {
+  const handleBlur = () => {
     const values = getValues();
     onUpdate(values);
   };
@@ -78,14 +78,17 @@ export function InvoiceForm({ invoice, onUpdate }: InvoiceFormProps) {
     const paidByAccount = watchedPayments[0] || 0;
     const paidInCash = watchedPayments[1] || 0;
     const dueAmount = grandTotal - paidByAccount - paidInCash;
-    setValue('dueAmount', Math.max(0, dueAmount));
-  }, [watchedItems, watchedTaxes, watchedPayments, setValue]);
+    
+    if (getValues('dueAmount') !== dueAmount) {
+        setValue('dueAmount', Math.max(0, dueAmount));
+    }
+  }, [watchedItems, watchedTaxes, watchedPayments, setValue, getValues]);
 
 
   return (
     <FormProvider {...formMethods}>
         <form 
-          onChange={handleFormChange}
+          onBlur={handleBlur}
           onSubmit={(e) => e.preventDefault()} 
           className="space-y-6"
         >
