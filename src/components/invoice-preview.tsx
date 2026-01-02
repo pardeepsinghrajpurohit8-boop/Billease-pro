@@ -44,7 +44,7 @@ export function InvoicePreview({ invoice, onPrint }: InvoicePreviewProps) {
     return { subtotal, cgstAmount, sgstAmount, grandTotal, totalPaid, dueAmount };
   }, [invoice]);
 
-  const { subtotal, cgstAmount, sgstAmount, grandTotal, totalPaid, dueAmount } = calculations;
+  const { subtotal, cgstAmount, sgstAmount, grandTotal } = calculations;
 
   const wordify = (num: number): string => {
     const a = [
@@ -86,7 +86,7 @@ export function InvoicePreview({ invoice, onPrint }: InvoicePreviewProps) {
                 <Download className="mr-2 h-4 w-4" /> Download PDF
             </Button>
         </div>
-        <Card id="invoice-preview" className="print-bg-white print-text-black w-full shadow-lg rounded-none overflow-hidden border">
+        <Card id="invoice-preview" className="print-bg-white print-text-black w-full shadow-lg rounded-none overflow-hidden border-2 border-black">
             <header className="p-8 print-bg-white border-b-2 border-black">
                 <div className="flex justify-between items-start">
                     <div className="text-center w-full">
@@ -105,29 +105,29 @@ export function InvoicePreview({ invoice, onPrint }: InvoicePreviewProps) {
                     </div>
                 </div>
             </header>
-            <main className="px-8 py-4">
+            <main>
                 <Table>
-                    <TableHeader className="print-border-gray">
-                        <TableRow className="border-b-2 border-black print-border-gray">
-                            <TableHead className="w-[60px] text-center font-bold text-black p-2 h-10 border border-black">S.No.</TableHead>
-                            <TableHead className="text-right font-bold text-black p-2 h-10 border border-black">Quantity</TableHead>
-                            <TableHead className="text-right font-bold text-black p-2 h-10 border border-black">Rate</TableHead>
-                            <TableHead className="w-[150px] text-right font-bold text-black p-2 h-10 border border-black">Amount</TableHead>
+                    <TableHeader>
+                        <TableRow className="border-b-2 border-black">
+                            <TableHead className="w-[60px] text-center font-bold text-black p-2 h-10 border-r-2 border-black">S.No.</TableHead>
+                            <TableHead className="text-right font-bold text-black p-2 h-10 border-r-2 border-black">Quantity</TableHead>
+                            <TableHead className="text-right font-bold text-black p-2 h-10 border-r-2 border-black">Rate</TableHead>
+                            <TableHead className="w-[150px] text-right font-bold text-black p-2 h-10">Amount</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {invoice.items.length > 0 && invoice.items.some(i => (i.quantity || 0) > 0 || (i.rate || 0) > 0) ? (
                             invoice.items.map((item, index) => (
-                                <TableRow key={item.id} className="border-0">
-                                    <TableCell className="text-center p-2 font-medium text-black align-top border-x border-b border-black h-10">{index + 1}</TableCell>
-                                    <TableCell className="text-right p-2 text-black align-top border-b border-r border-black">{item.quantity || ''}</TableCell>
-                                    <TableCell className="text-right p-2 text-black align-top border-b border-r border-black">{item.rate ? formatCurrency(item.rate) : ''}</TableCell>
-                                    <TableCell className="text-right font-semibold p-2 text-black align-top border-b border-r border-black">{formatCurrency((item.quantity || 0) * (item.rate || 0))}</TableCell>
+                                <TableRow key={item.id} className="border-b-2 border-black">
+                                    <TableCell className="text-center p-2 font-medium text-black align-top border-r-2 border-black h-10">{index + 1}</TableCell>
+                                    <TableCell className="text-right p-2 text-black align-top border-r-2 border-black">{item.quantity || ''}</TableCell>
+                                    <TableCell className="text-right p-2 text-black align-top border-r-2 border-black">{item.rate ? formatCurrency(item.rate) : ''}</TableCell>
+                                    <TableCell className="text-right font-semibold p-2 text-black align-top">{formatCurrency((item.quantity || 0) * (item.rate || 0))}</TableCell>
                                 </TableRow>
                             ))
                         ) : (
-                            <TableRow>
-                                <TableCell colSpan={4} className="text-center p-8 text-muted-foreground h-[240px] border border-black">
+                             <TableRow className="border-b-2 border-black">
+                                <TableCell colSpan={4} className="text-center p-8 text-muted-foreground h-[240px] align-middle">
                                     <FileText className="mx-auto h-12 w-12 text-muted-foreground/50 mb-4" />
                                     <p className="font-semibold">Your bill items will appear here.</p>
                                     <p className="text-sm">Start by adding items using the form.</p>
@@ -137,15 +137,15 @@ export function InvoicePreview({ invoice, onPrint }: InvoicePreviewProps) {
                     </TableBody>
                 </Table>
             </main>
-            <div className="px-8 py-4 border-t-2 border-black">
+            <div className="border-t-2 border-black">
                 <div className="grid grid-cols-12">
-                    <div className="col-span-7 pr-4">
+                    <div className="col-span-7 pr-4 p-4">
                          <div className="space-y-1 text-sm">
                             <p className="font-bold text-base mb-2">Total in words:</p>
                             <p className="text-sm font-semibold leading-relaxed">{grandTotal > 0 ? grandTotalInWords : ''}</p>
                         </div>
                     </div>
-                    <div className="col-span-5 pl-4 border-l-2 border-black">
+                    <div className="col-span-5 p-4 border-l-2 border-black">
                         <div className="space-y-2 text-base">
                             <div className="flex justify-between font-medium">
                                 <span>Subtotal</span>
