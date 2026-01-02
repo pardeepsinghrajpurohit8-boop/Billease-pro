@@ -1,7 +1,7 @@
 'use client';
 
 import type { Invoice } from '@/lib/types';
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -63,49 +63,47 @@ export function InvoicePreview({ invoice, onPrint }: InvoicePreviewProps) {
             </Button>
         </div>
         <Card id="invoice-preview" className="print-bg-white print-text-black w-full shadow-lg rounded-none overflow-hidden border">
-            <header className="p-4 print-bg-white">
+            <header className="p-4 print-bg-white border-b-2 border-black">
                 <div className="flex justify-between items-start">
-                    <div>
+                    <div className="text-center w-full">
                         <h1 className="text-xl font-extrabold tracking-tight text-red-600">MATESHWARI EXPORTS</h1>
                         <p className="text-black text-xs">Mfrs. & Wholesale : All types of Jeans</p>
                     </div>
-                    <div className="text-right">
-                        <p className="text-sm text-black mt-1">Date: {invoice.invoiceDate ? new Date(invoice.invoiceDate).toLocaleDateString('en-GB') : 'N/A'}</p>
-                    </div>
                 </div>
                 
-                <Separator className="my-3 bg-gray-300 print-border-gray" />
-                
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
+                <div className="flex justify-between text-sm mt-4">
+                     <div>
                         <p className="font-semibold text-black mb-1">Bill To:</p>
                         <p className="font-bold text-base text-black">{invoice.customerName || 'Customer Name'}</p>
                     </div>
+                    <div className="text-right">
+                        <p className="text-sm text-black">Date: {invoice.invoiceDate ? new Date(invoice.invoiceDate).toLocaleDateString('en-GB') : 'N/A'}</p>
+                    </div>
                 </div>
             </header>
-            <main className="px-4 border-t border-gray-300 print-border-gray">
+            <main className="px-4">
                 <Table>
                     <TableHeader className="print-border-gray">
-                        <TableRow className="border-b border-black print-border-gray">
+                        <TableRow className="border-b-2 border-black print-border-gray">
                             <TableHead className="w-[50px] text-center font-bold text-black p-2 h-8">S.No.</TableHead>
                             <TableHead className="text-right font-bold text-black p-2 h-8">Quantity</TableHead>
                             <TableHead className="text-right font-bold text-black p-2 h-8">Rate</TableHead>
-                            <TableHead className="text-right font-bold text-black p-2 h-8">Amount</TableHead>
+                            <TableHead className="w-[120px] text-right font-bold text-black p-2 h-8">Amount</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {invoice.items.length > 0 && invoice.items.some(i => i.quantity > 0 || i.rate > 0) ? (
                             invoice.items.map((item, index) => (
-                                <TableRow key={item.id} className="border-0 border-b border-gray-300">
-                                    <TableCell className="text-center p-2 font-medium text-black align-top h-8">{index + 1}</TableCell>
-                                    <TableCell className="text-right p-2 text-black align-top h-8">{item.quantity || 0}</TableCell>
-                                    <TableCell className="text-right p-2 text-black align-top h-8">{formatCurrency(item.rate || 0)}</TableCell>
-                                    <TableCell className="text-right font-semibold p-2 text-black align-top h-8">{formatCurrency((item.quantity || 0) * (item.rate || 0))}</TableCell>
+                                <TableRow key={item.id} className="border-0 border-b border-gray-300 print-border-gray h-8">
+                                    <TableCell className="text-center p-2 font-medium text-black align-top">{index + 1}</TableCell>
+                                    <TableCell className="text-right p-2 text-black align-top">{item.quantity || ''}</TableCell>
+                                    <TableCell className="text-right p-2 text-black align-top">{item.rate ? formatCurrency(item.rate) : ''}</TableCell>
+                                    <TableCell className="text-right font-semibold p-2 text-black align-top">{formatCurrency((item.quantity || 0) * (item.rate || 0))}</TableCell>
                                 </TableRow>
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={4} className="text-center p-8 text-muted-foreground border-x-0">
+                                <TableCell colSpan={4} className="text-center p-8 text-muted-foreground h-[200px]">
                                     <FileText className="mx-auto h-10 w-10 text-muted-foreground/50 mb-4" />
                                     <p>Your bill items will appear here.</p>
                                     <p className="text-sm">Start by adding items using the form.</p>
@@ -118,35 +116,35 @@ export function InvoicePreview({ invoice, onPrint }: InvoicePreviewProps) {
 
             <div className="px-4 py-2 border-t-2 border-black">
                 <div className="grid grid-cols-12">
-                    <div className="col-span-7 pr-4">
+                    <div className="col-span-7 pr-4 border-r border-black">
                         <p className="font-bold text-sm">Total in words:</p>
-                        <p className="text-xs font-semibold">{grandTotalInWords}</p>
+                        <p className="text-xs font-semibold">{grandTotal > 0 ? grandTotalInWords : ''}</p>
                     </div>
-                    <div className="col-span-5">
+                    <div className="col-span-5 pl-4">
                         <div className="space-y-1 text-sm">
                             <div className="flex justify-between">
-                                <span className="font-bold">Subtotal</span>
-                                <span className="font-bold">{formatCurrency(subtotal)}</span>
+                                <span className="font-semibold">Subtotal</span>
+                                <span className="font-semibold text-right w-[120px]">{formatCurrency(subtotal)}</span>
                             </div>
                             <div className="flex justify-between">
                                 <span>CGST ({invoice.cgst || 0}%)</span>
-                                <span>{formatCurrency(cgstAmount)}</span>
+                                <span className="text-right w-[120px]">{formatCurrency(cgstAmount)}</span>
                             </div>
                             <div className="flex justify-between">
                                 <span>SGST ({invoice.sgst || 0}%)</span>
-                                <span>{formatCurrency(sgstAmount)}</span>
+                                <span className="text-right w-[120px]">{formatCurrency(sgstAmount)}</span>
                             </div>
                             <Separator className="my-1 bg-black" />
                             <div className="flex justify-between">
                                 <span className="font-bold text-lg">Grand Total</span>
-                                <span className="font-bold text-lg">{formatCurrency(grandTotal)}</span>
+                                <span className="font-bold text-lg text-right w-[120px]">{formatCurrency(grandTotal)}</span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <footer className="p-4 print-bg-white border-t border-gray-300 print-border-gray">
+            <footer className="p-4 print-bg-white border-t-2 border-black">
                 <div className="text-center w-full text-xs">
                     <p className="font-semibold text-black">Thank you for your business!</p>
                     <p className="text-black">MATESHWARI EXPORTS</p>
