@@ -11,4 +11,7 @@ export type Invoice = {
   items: InvoiceItem[];
   cgst: number;
   sgst: number;
+  paidByAccount?: number;
+  paidInCash?: number;
+  dueAmount?: number;
 };

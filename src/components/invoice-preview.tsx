@@ -13,7 +13,15 @@ interface InvoicePreviewProps {
   onPrint: () => void;
 }
 
-const formatCurrency = (amount: number) => {
+const formatCurrency = (amount: number | undefined) => {
+  if (typeof amount !== 'number' || isNaN(amount)) {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(0);
+  }
   return new Intl.NumberFormat('en-IN', {
     style: 'currency',
     currency: 'INR',
@@ -28,10 +36,15 @@ export function InvoicePreview({ invoice, onPrint }: InvoicePreviewProps) {
     const cgstAmount = subtotal * ((invoice.cgst || 0) / 100);
     const sgstAmount = subtotal * ((invoice.sgst || 0) / 100);
     const grandTotal = subtotal + cgstAmount + sgstAmount;
-    return { subtotal, cgstAmount, sgstAmount, grandTotal };
+    const paidByAccount = invoice.paidByAccount || 0;
+    const paidInCash = invoice.paidInCash || 0;
+    const totalPaid = paidByAccount + paidInCash;
+    const dueAmount = grandTotal - totalPaid;
+
+    return { subtotal, cgstAmount, sgstAmount, grandTotal, totalPaid, dueAmount };
   }, [invoice]);
 
-  const { subtotal, cgstAmount, sgstAmount, grandTotal } = calculations;
+  const { subtotal, cgstAmount, sgstAmount, grandTotal, totalPaid, dueAmount } = calculations;
 
   const wordify = (num: number): string => {
     const a = [
@@ -40,20 +53,31 @@ export function InvoicePreview({ invoice, onPrint }: InvoicePreviewProps) {
     const b = [
         '', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'
     ];
-    const s = num.toString();
+    const s = Math.floor(num).toString();
     if (s.length > 9) return 'overflow';
-    const n = ('000000000' + s).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
-    if (!n) return '';
+    const nMatch = ('000000000' + s).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
+    if (!nMatch) return '';
+    const [, n1, n2, n3, n4, n5] = nMatch;
+    
     let str = '';
-    str += (n[1] != '00') ? (a[Number(n[1])] || b[n[1][0]] + ' ' + a[n[1][1]]) + ' crore ' : '';
-    str += (n[2] != '00') ? (a[Number(n[2])] || b[n[2][0]] + ' ' + a[n[2][1]]) + ' lakh ' : '';
-    str += (n[3] != '00') ? (a[Number(n[3])] || b[n[3][0]] + ' ' + a[n[3][1]]) + ' thousand ' : '';
-    str += (n[4] != '0') ? (a[Number(n[4])] || b[n[4][0]] + ' ' + a[n[4][1]]) + ' hundred ' : '';
-    str += (n[5] != '00') ? ((str != '') ? 'and ' : '') + (a[Number(n[5])] || b[n[5][0]] + ' ' + a[n[5][1]]) : '';
-    return str.trim().replace(/\s+/g, ' ').toUpperCase() + ' ONLY';
+    str += (n1 != '00') ? (a[Number(n1)] || b[n1[0]] + ' ' + a[n1[1]]).trim() + ' crore ' : '';
+    str += (n2 != '00') ? (a[Number(n2)] || b[n2[0]] + ' ' + a[n2[1]]).trim() + ' lakh ' : '';
+    str += (n3 != '00') ? (a[Number(n3)] || b[n3[0]] + ' ' + a[n3[1]]).trim() + ' thousand ' : '';
+    str += (n4 != '0') ? (a[Number(n4)] || b[n4[0]] + ' ' + a[n4[1]]).trim() + ' hundred ' : '';
+    str += (n5 != '00') ? ((str != '') ? 'and ' : '') + (a[Number(n5)] || b[n5[0]] + ' ' + a[n5[1]]).trim() : '';
+
+    const rupees = str.trim().replace(/\s+/g, ' ');
+    
+    const paisa = Math.round((num - Math.floor(num)) * 100);
+    let paisaStr = '';
+    if (paisa > 0) {
+        paisaStr += ((rupees !== '') ? ' and ' : '') + (a[paisa] || b[Math.floor(paisa / 10)] + ' ' + a[paisa % 10]).trim() + ' paisa';
+    }
+
+    return (rupees + paisaStr).toUpperCase() + ' ONLY';
   }
   
-  const grandTotalInWords = useMemo(() => wordify(Math.floor(grandTotal)), [grandTotal]);
+  const grandTotalInWords = useMemo(() => wordify(grandTotal), [grandTotal]);
 
   return (
     <div className="w-full max-w-4xl mx-auto">
@@ -63,49 +87,49 @@ export function InvoicePreview({ invoice, onPrint }: InvoicePreviewProps) {
             </Button>
         </div>
         <Card id="invoice-preview" className="print-bg-white print-text-black w-full shadow-lg rounded-none overflow-hidden border">
-            <header className="p-4 print-bg-white border-b-2 border-black">
+            <header className="p-8 print-bg-white border-b-2 border-black">
                 <div className="flex justify-between items-start">
                     <div className="text-center w-full">
-                        <h1 className="text-xl font-extrabold tracking-tight text-red-600">MATESHWARI EXPORTS</h1>
-                        <p className="text-black text-xs">Mfrs. & Wholesale : All types of Jeans</p>
+                        <h1 className="text-2xl font-extrabold tracking-tight text-red-600">MATESHWARI EXPORTS</h1>
+                        <p className="text-black text-sm">Mfrs. & Wholesale : All types of Jeans</p>
                     </div>
                 </div>
                 
-                <div className="flex justify-between text-sm mt-4">
+                <div className="flex justify-between text-base mt-6">
                      <div>
                         <p className="font-semibold text-black mb-1">Bill To:</p>
-                        <p className="font-bold text-base text-black">{invoice.customerName || 'Customer Name'}</p>
+                        <p className="font-bold text-lg text-black">{invoice.customerName || 'Customer Name'}</p>
                     </div>
                     <div className="text-right">
-                        <p className="text-sm text-black">Date: {invoice.invoiceDate ? new Date(invoice.invoiceDate).toLocaleDateString('en-GB') : 'N/A'}</p>
+                        <p className="font-semibold text-black">Date: {invoice.invoiceDate ? new Date(invoice.invoiceDate).toLocaleDateString('en-GB') : 'N/A'}</p>
                     </div>
                 </div>
             </header>
-            <main className="px-4">
+            <main className="px-8 py-4">
                 <Table>
                     <TableHeader className="print-border-gray">
                         <TableRow className="border-b-2 border-black print-border-gray">
-                            <TableHead className="w-[50px] text-center font-bold text-black p-2 h-8">S.No.</TableHead>
-                            <TableHead className="text-right font-bold text-black p-2 h-8">Quantity</TableHead>
-                            <TableHead className="text-right font-bold text-black p-2 h-8">Rate</TableHead>
-                            <TableHead className="w-[120px] text-right font-bold text-black p-2 h-8">Amount</TableHead>
+                            <TableHead className="w-[60px] text-center font-bold text-black p-2 h-10 border border-black">S.No.</TableHead>
+                            <TableHead className="text-right font-bold text-black p-2 h-10 border border-black">Quantity</TableHead>
+                            <TableHead className="text-right font-bold text-black p-2 h-10 border border-black">Rate</TableHead>
+                            <TableHead className="w-[150px] text-right font-bold text-black p-2 h-10 border border-black">Amount</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {invoice.items.length > 0 && invoice.items.some(i => i.quantity > 0 || i.rate > 0) ? (
+                        {invoice.items.length > 0 && invoice.items.some(i => (i.quantity || 0) > 0 || (i.rate || 0) > 0) ? (
                             invoice.items.map((item, index) => (
-                                <TableRow key={item.id} className="border-0 border-b border-gray-300 print-border-gray h-8">
-                                    <TableCell className="text-center p-2 font-medium text-black align-top">{index + 1}</TableCell>
-                                    <TableCell className="text-right p-2 text-black align-top">{item.quantity || ''}</TableCell>
-                                    <TableCell className="text-right p-2 text-black align-top">{item.rate ? formatCurrency(item.rate) : ''}</TableCell>
-                                    <TableCell className="text-right font-semibold p-2 text-black align-top">{formatCurrency((item.quantity || 0) * (item.rate || 0))}</TableCell>
+                                <TableRow key={item.id} className="border-0">
+                                    <TableCell className="text-center p-2 font-medium text-black align-top border-x border-b border-black h-10">{index + 1}</TableCell>
+                                    <TableCell className="text-right p-2 text-black align-top border-b border-r border-black">{item.quantity || ''}</TableCell>
+                                    <TableCell className="text-right p-2 text-black align-top border-b border-r border-black">{item.rate ? formatCurrency(item.rate) : ''}</TableCell>
+                                    <TableCell className="text-right font-semibold p-2 text-black align-top border-b border-r border-black">{formatCurrency((item.quantity || 0) * (item.rate || 0))}</TableCell>
                                 </TableRow>
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={4} className="text-center p-8 text-muted-foreground h-[200px]">
-                                    <FileText className="mx-auto h-10 w-10 text-muted-foreground/50 mb-4" />
-                                    <p>Your bill items will appear here.</p>
+                                <TableCell colSpan={4} className="text-center p-8 text-muted-foreground h-[240px] border border-black">
+                                    <FileText className="mx-auto h-12 w-12 text-muted-foreground/50 mb-4" />
+                                    <p className="font-semibold">Your bill items will appear here.</p>
                                     <p className="text-sm">Start by adding items using the form.</p>
                                 </TableCell>
                             </TableRow>
@@ -113,41 +137,55 @@ export function InvoicePreview({ invoice, onPrint }: InvoicePreviewProps) {
                     </TableBody>
                 </Table>
             </main>
-
-            <div className="px-4 py-2 border-t-2 border-black">
+            <div className="px-8 py-4 border-t-2 border-black">
                 <div className="grid grid-cols-12">
-                    <div className="col-span-7 pr-4 border-r border-black">
-                        <p className="font-bold text-sm">Total in words:</p>
-                        <p className="text-xs font-semibold">{grandTotal > 0 ? grandTotalInWords : ''}</p>
+                    <div className="col-span-7 pr-4">
+                         <div className="space-y-1 text-sm">
+                            <p className="font-bold text-base mb-2">Total in words:</p>
+                            <p className="text-sm font-semibold leading-relaxed">{grandTotal > 0 ? grandTotalInWords : ''}</p>
+                        </div>
                     </div>
-                    <div className="col-span-5 pl-4">
-                        <div className="space-y-1 text-sm">
-                            <div className="flex justify-between">
-                                <span className="font-semibold">Subtotal</span>
-                                <span className="font-semibold text-right w-[120px]">{formatCurrency(subtotal)}</span>
+                    <div className="col-span-5 pl-4 border-l-2 border-black">
+                        <div className="space-y-2 text-base">
+                            <div className="flex justify-between font-medium">
+                                <span>Subtotal</span>
+                                <span className="text-right w-[150px]">{formatCurrency(subtotal)}</span>
                             </div>
                             <div className="flex justify-between">
                                 <span>CGST ({invoice.cgst || 0}%)</span>
-                                <span className="text-right w-[120px]">{formatCurrency(cgstAmount)}</span>
+                                <span className="text-right w-[150px]">{formatCurrency(cgstAmount)}</span>
                             </div>
                             <div className="flex justify-between">
                                 <span>SGST ({invoice.sgst || 0}%)</span>
-                                <span className="text-right w-[120px]">{formatCurrency(sgstAmount)}</span>
+                                <span className="text-right w-[150px]">{formatCurrency(sgstAmount)}</span>
                             </div>
-                            <Separator className="my-1 bg-black" />
+                            <Separator className="my-2 bg-black" />
+                            <div className="flex justify-between font-bold text-lg">
+                                <span>Grand Total</span>
+                                <span className="text-right w-[150px]">{formatCurrency(grandTotal)}</span>
+                            </div>
+                            <Separator className="my-2 bg-gray-400" />
                             <div className="flex justify-between">
-                                <span className="font-bold text-lg">Grand Total</span>
-                                <span className="font-bold text-lg text-right w-[120px]">{formatCurrency(grandTotal)}</span>
+                                <span>Paid (Account)</span>
+                                <span className="text-right w-[150px]">{formatCurrency(invoice.paidByAccount)}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span>Paid (Cash)</span>
+                                <span className="text-right w-[150px]">{formatCurrency(invoice.paidInCash)}</span>
+                            </div>
+                             <div className="flex justify-between font-semibold text-red-600">
+                                <span>Due Amount</span>
+                                <span className="text-right w-[150px]">{formatCurrency(invoice.dueAmount)}</span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <footer className="p-4 print-bg-white border-t-2 border-black">
-                <div className="text-center w-full text-xs">
-                    <p className="font-semibold text-black">Thank you for your business!</p>
-                    <p className="text-black">MATESHWARI EXPORTS</p>
+            <footer className="p-8 print-bg-white border-t-2 border-black">
+                <div className="text-center w-full">
+                    <p className="font-bold text-base text-black">Thank you for your business!</p>
+                    <p className="text-sm text-black mt-1">MATESHWARI EXPORTS</p>
                 </div>
             </footer>
         </Card>

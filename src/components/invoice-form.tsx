@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Trash2, PlusCircle } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface InvoiceFormProps {
   invoice: Invoice;
@@ -31,22 +32,24 @@ const invoiceSchema = z.object({
   ).min(1, 'At least one item is required'),
   cgst: z.number().min(0).max(100),
   sgst: z.number().min(0).max(100),
+  paidByAccount: z.number().min(0).optional(),
+  paidInCash: z.number().min(0).optional(),
+  dueAmount: z.number().min(0).optional(),
 });
 
 export function InvoiceForm({ invoice, onUpdate }: InvoiceFormProps) {
   const formMethods = useForm<Invoice>({
     resolver: zodResolver(invoiceSchema),
     defaultValues: invoice,
-    mode: 'onBlur',
   });
 
   const {
     register,
     control,
     reset,
-    handleSubmit,
-    formState: { errors },
-    getValues
+    getValues,
+    setValue,
+    watch,
   } = formMethods;
 
   const { fields, append, remove } = useFieldArray({
@@ -58,15 +61,31 @@ export function InvoiceForm({ invoice, onUpdate }: InvoiceFormProps) {
     reset(invoice);
   }, [invoice, reset]);
 
-  const handleBlur = () => {
+  const handleFormChange = () => {
     const values = getValues();
     onUpdate(values);
   };
   
+  const watchedItems = watch('items');
+  const watchedTaxes = watch(['cgst', 'sgst']);
+  const watchedPayments = watch(['paidByAccount', 'paidInCash']);
+
+  useEffect(() => {
+    const subtotal = watchedItems.reduce((acc, item) => acc + (item.quantity || 0) * (item.rate || 0), 0);
+    const cgstAmount = subtotal * ((watchedTaxes[0] || 0) / 100);
+    const sgstAmount = subtotal * ((watchedTaxes[1] || 0) / 100);
+    const grandTotal = subtotal + cgstAmount + sgstAmount;
+    const paidByAccount = watchedPayments[0] || 0;
+    const paidInCash = watchedPayments[1] || 0;
+    const dueAmount = grandTotal - paidByAccount - paidInCash;
+    setValue('dueAmount', Math.max(0, dueAmount));
+  }, [watchedItems, watchedTaxes, watchedPayments, setValue]);
+
+
   return (
     <FormProvider {...formMethods}>
         <form 
-          onBlur={handleBlur}
+          onChange={handleFormChange}
           onSubmit={(e) => e.preventDefault()} 
           className="space-y-6"
         >
@@ -80,7 +99,6 @@ export function InvoiceForm({ invoice, onUpdate }: InvoiceFormProps) {
                 <div>
                     <Label htmlFor="customerName">Customer Name</Label>
                     <Input id="customerName" {...register('customerName')} placeholder="Enter customer's name" />
-                    {errors.customerName && <p className="text-destructive text-sm mt-1">{errors.customerName.message}</p>}
                 </div>
                 <div>
                     <Label htmlFor="invoiceDate">Bill Date</Label>
@@ -133,11 +151,7 @@ export function InvoiceForm({ invoice, onUpdate }: InvoiceFormProps) {
                 <Button
                     type="button"
                     variant="outline"
-                    onClick={() => {
-                      append({ id: nanoid(), quantity: 1, rate: 0 });
-                      // We can trigger an update after adding an item if needed
-                      setTimeout(() => handleBlur(), 0);
-                    }}
+                    onClick={() => append({ id: nanoid(), quantity: 1, rate: 0 })}
                     className="w-full"
                 >
                     <PlusCircle className="mr-2 h-4 w-4" />
@@ -148,17 +162,29 @@ export function InvoiceForm({ invoice, onUpdate }: InvoiceFormProps) {
             
             <Card className="shadow-md">
             <CardHeader>
-                <CardTitle>Taxes</CardTitle>
-                <CardDescription>Applicable tax rates.</CardDescription>
+                <CardTitle>Taxes & Payments</CardTitle>
+                <CardDescription>Tax rates and payment details.</CardDescription>
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-4">
                 <div>
-                <Label htmlFor="cgst">CGST (%)</Label>
-                <Input id="cgst" type="number" {...register('cgst', { valueAsNumber: true })} placeholder="e.g., 2.5" />
+                  <Label htmlFor="cgst">CGST (%)</Label>
+                  <Input id="cgst" type="number" {...register('cgst', { valueAsNumber: true })} placeholder="e.g., 2.5" />
                 </div>
                 <div>
-                <Label htmlFor="sgst">SGST (%)</Label>
-                <Input id="sgst" type="number" {...register('sgst', { valueAsNumber: true })} placeholder="e.g., 2.5" />
+                  <Label htmlFor="sgst">SGST (%)</Label>
+                  <Input id="sgst" type="number" {...register('sgst', { valueAsNumber: true })} placeholder="e.g., 2.5" />
+                </div>
+                 <div>
+                    <Label htmlFor="paidByAccount">Paid by Account</Label>
+                    <Input id="paidByAccount" type="number" {...register('paidByAccount', { valueAsNumber: true })} placeholder="Amount" />
+                </div>
+                <div>
+                    <Label htmlFor="paidInCash">Paid in Cash</Label>
+                    <Input id="paidInCash" type="number" {...register('paidInCash', { valueAsNumber: true })} placeholder="Amount" />
+                </div>
+                 <div className="col-span-2">
+                    <Label htmlFor="dueAmount">Due Amount</Label>
+                    <Input id="dueAmount" type="number" {...register('dueAmount', { valueAsNumber: true })} placeholder="Remaining balance" readOnly className="bg-muted/50" />
                 </div>
             </CardContent>
             </Card>
